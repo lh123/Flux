@@ -93,7 +93,6 @@ public class WelfareService extends Service
         {
             if (!isGrabWelfare)
             {
-                //isGrabWelfare = true;
                 Log("service start");
                 startTime = System.currentTimeMillis();
                 actTime = intent.getLongExtra("act", startTime);
