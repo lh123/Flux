@@ -193,7 +193,6 @@ public class WelfareService extends Service
             builder.setContentIntent(pi);
             Notification no = builder.build();
             no.flags = Notification.FLAG_AUTO_CANCEL;
-            //nm.cancel(FLAG_SERVICE_RUNNING);
             nm.notify(FLAG_WELFARE_RESULT, no);
         }
     }
@@ -203,7 +202,6 @@ public class WelfareService extends Service
     {
         if (event.isSuccess())
         {
-            //Log(event.getData().getMsg());
             if ("000".equals(event.getData().getReturnCode()))
             {
                 isGrabWelfare = false;
@@ -289,7 +287,6 @@ public class WelfareService extends Service
         }
         else
         {
-            //showNotification("获取Cookie失败",FLAG_SERVICE_RUNNING);
             loginTimes--;
             if (loginTimes > 0)
             {
