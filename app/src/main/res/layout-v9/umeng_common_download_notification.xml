@@ -45,7 +45,6 @@
             android:orientation="horizontal">
 
             <Button
-                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/umeng_common_rich_notification_continue"
                 android:layout_width="50dp"
                 android:layout_height="25dp"
@@ -55,7 +54,6 @@
                 android:textSize="12sp" />
 
             <Button
-                style="?android:attr/buttonBarButtonStyle"
                 android:id="@+id/umeng_common_rich_notification_cancel"
                 android:layout_width="50dp"
                 android:layout_height="25dp"

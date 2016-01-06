@@ -2,6 +2,7 @@ package com.lh.flux.domain;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 
 import com.alibaba.fastjson.JSON;
 import com.lh.flux.crash.LogUtil;
