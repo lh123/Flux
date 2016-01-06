@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Flux</string>
+    <string name="phone">电话:</string>
+    <string name="logining">状态:正在登录</string>
+    <string name="login_already">状态:已登录</string>
+    <string name="login_fail">状态:登录失败</string>
+    <string name="current_status">当前状态:</string>
+    <string name="reboot">重启</string>
+    <string name="close">关闭</string>
+    <string name="login">登录</string>
+    <string name="retry">重试</string>
+    <string name="flux_status">流量情况:</string>
+    <string name="refresh">刷新</string>
+    <string name="envelope_status">红包状态:</string>
+    <string name="next_round_time">下轮时间:</string>
+    <string name="type">类型:</string>
+    <string name="grab">抢</string>
+    <string name="history">历史</string>
+    <string name="auto_grab_envelope">自动抢红包</string>
+    <string name="phone_number">电话号码</string>
+    <string name="capture">验证码</string>
+    <string name="get_capture">获取验证码</string>
+    <string name="setting">设置</string>
+    <string name="warning">warning</string>
+
+</resources>

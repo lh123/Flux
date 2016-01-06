@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:gravity="center_horizontal"
+    android:orientation="vertical">
+
+    <include layout="@layout/toolbar"/>
+
+    <EditText
+        android:id="@+id/login_ed_phone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/marginEdge"
+        android:ems="10"
+        android:hint="@string/phone_number"
+        android:inputType="phone"/>
+
+    <EditText
+        android:id="@+id/login_ed_cap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/marginEdge"
+        android:ems="10"
+        android:hint="@string/capture"
+        android:inputType="number"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/login_btn_login"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/buttonHeight"
+            android:layout_margin="@dimen/marginEdge"
+            android:background="@drawable/btn_background"
+            android:text="@string/login"
+            android:textColor="?attr/textColor"/>
+
+        <Button
+            android:id="@+id/login_btn_get_cap"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/buttonHeight"
+            android:layout_margin="@dimen/marginEdge"
+            android:background="@drawable/btn_background"
+            android:text="@string/get_capture"
+            android:textColor="?attr/textColor"/>
+
+    </LinearLayout>
+
+</LinearLayout>
+
