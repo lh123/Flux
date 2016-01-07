@@ -3,6 +3,7 @@ package com.lh.flux;
 import android.app.Application;
 import android.content.Context;
 import android.os.UserManager;
+import android.util.Log;
 
 import com.lh.flux.crash.MyCrashHandler;
 import com.lh.flux.domain.FluxUserManager;
@@ -48,10 +49,12 @@ public class FluxApp extends Application
                 Class<? extends UserManager> clss = um.getClass();
                 Method m = clss.getDeclaredMethod("get", Context.class);
                 m.invoke(um, this);
+                Log.e("reflect","success");
             }
             catch (Exception e)
             {
                 e.printStackTrace();
+                Log.e("reflect", "fail");
             }
         }
     }

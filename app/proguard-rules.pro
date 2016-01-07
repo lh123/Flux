@@ -31,29 +31,8 @@
     @com.squareup.otto.Subscribe public *;
     @com.squareup.otto.Produce public *;
 }
-
+#fastjson
+-keepattributes Signature
 -keep class com.lh.flux.model.entity.**{*;}
-##---------------Begin: proguard configuration for fastjson  ----------
-
-#-keepnames class * implements java.io.Serializable
--keep public class * implements java.io.Serializable {
-        public *;
-}
--keepclassmembers class * implements java.io.Serializable {
-    static final long serialVersionUID;
-    private static final java.io.ObjectStreamField[] serialPersistentFields;
-    private void writeObject(java.io.ObjectOutputStream);
-    private void readObject(java.io.ObjectInputStream);
-    java.lang.Object writeReplace();
-    java.lang.Object readResolve();
-}
-
--dontskipnonpubliclibraryclassmembers
--dontskipnonpubliclibraryclasses
 -dontwarn com.alibaba.fastjson.**
 -keep class com.alibaba.fastjson.** { *; }
--libraryjars libs/fastjson.jar
-
--keepclassmembers class * {
-public <methods>;
-}
