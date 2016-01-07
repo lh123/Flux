@@ -1,9 +1,13 @@
 package com.lh.flux.domain;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 
+import com.lh.flux.domain.utils.PermissionUtil;
 import com.lh.flux.model.entity.User;
 
 public class FluxUserManager
@@ -36,16 +40,23 @@ public class FluxUserManager
 
     public void init(Context context)
     {
-        mContext=context;
+        mContext = context;
         mPreference = context.getSharedPreferences("user", Context.MODE_PRIVATE);
+    }
+
+    public boolean canLogin()
+    {
+        return ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE)
+                == PackageManager.PERMISSION_GRANTED
+                || (mPreference.contains("imei") && mPreference.contains("imsi"));
     }
 
     public void refreshUser()
     {
-        if(mPreference.contains("imei")&&mPreference.contains("imsi"))
+        if (mPreference.contains("imei") && mPreference.contains("imsi"))
         {
-            user.setImei(mPreference.getString("imei",null));
-            user.setImsi(mPreference.getString("imsi",null));
+            user.setImei(mPreference.getString("imei", null));
+            user.setImsi(mPreference.getString("imsi", null));
         }
         else
         {
@@ -63,8 +74,8 @@ public class FluxUserManager
     public void saveUser()
     {
         SharedPreferences.Editor edit = mPreference.edit();
-        edit.putString("imei",user.getImei());
-        edit.putString("imsi",user.getImsi());
+        edit.putString("imei", user.getImei());
+        edit.putString("imsi", user.getImsi());
         edit.putString("phone", user.getPhone());
         edit.putString("token", user.getToken());
         edit.putString("sessionID", user.getSessionID());

@@ -105,7 +105,7 @@ public class FluxPresenter
 
     public void startLogin()
     {
-        if(ContextCompat.checkSelfPermission(mFluxActivity.getContext(), Manifest.permission.READ_PHONE_STATE)== PackageManager.PERMISSION_DENIED)
+        if(!FluxUserManager.getInstance().canLogin())
         {
             return;
         }
