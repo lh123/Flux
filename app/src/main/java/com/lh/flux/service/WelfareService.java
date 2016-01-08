@@ -144,23 +144,31 @@ public class WelfareService extends Service
 
     private void startAutoGrab()
     {
-        isGrabWelfare = true;
-        if (!FluxUserManager.getInstance().getUser().isLogin())
+        if(FluxUserManager.getInstance().canLogin())
         {
-            isNeedGrab = true;
-            showNotification("正在尝试登录", FLAG_SERVICE_RUNNING);
-            FluxUserManager.getInstance().refreshUser();
-            mLoginUsecase.login(FluxUserManager.getInstance().getUser());
-        }
-        else if (FluxUserManager.getInstance().getUser().getCookie() == null)
-        {
-            isNeedGrab = true;
-            showNotification("正在获取Cookie", FLAG_SERVICE_RUNNING);
-            mWelfareUsecase.getWelfareCoookie(FluxUserManager.getInstance().getUser());
+            isGrabWelfare = true;
+            if (!FluxUserManager.getInstance().getUser().isLogin())
+            {
+                isNeedGrab = true;
+                showNotification("正在尝试登录", FLAG_SERVICE_RUNNING);
+                FluxUserManager.getInstance().refreshUser();
+                mLoginUsecase.login(FluxUserManager.getInstance().getUser());
+            }
+            else if (FluxUserManager.getInstance().getUser().getCookie() == null)
+            {
+                isNeedGrab = true;
+                showNotification("正在获取Cookie", FLAG_SERVICE_RUNNING);
+                mWelfareUsecase.getWelfareCoookie(FluxUserManager.getInstance().getUser());
+            }
+            else
+            {
+                mWelfareUsecase.grabWelfare(FluxUserManager.getInstance().getUser());
+            }
         }
         else
         {
-            mWelfareUsecase.grabWelfare(FluxUserManager.getInstance().getUser());
+            showNotification("权限被禁止，无法登陆",FLAG_WELFARE_RESULT);
+            releaseLockAndStop();
         }
     }
 

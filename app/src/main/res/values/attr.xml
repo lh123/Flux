@@ -3,4 +3,5 @@
     <attr name="colorDisable" formate="color|reference" />
     <attr name="textColor" formate="color|reference" />
     <attr name="viewBackground" formate="color|reference" />
+    <attr name="btnBackground" format="reference"/>
 </resources>

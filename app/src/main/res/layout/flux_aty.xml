@@ -5,221 +5,224 @@
     android:layout_height="fill_parent"
     android:orientation="vertical">
 
-    <include layout="@layout/toolbar" />
+    <include layout="@layout/toolbar"/>
 
     <RelativeLayout
-        android:layout_margin="@dimen/marginEdge"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_width="match_parent">
+        android:layout_margin="@dimen/marginEdge">
 
         <TextView
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/tv_phone"
             android:layout_width="wrap_content"
-            android:id="@+id/tv_phone" />
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <TextView
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/tv_login_status"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_below="@id/tv_phone"
-            android:id="@+id/tv_login_status" />
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <Button
-            android:layout_margin="@dimen/marginEdge"
-            android:layout_height="@dimen/buttonHeight"
-            android:layout_width="wrap_content"
-            android:text="@string/login"
-            android:textColor="?attr/textColor"
-            android:layout_alignParentRight="true"
             android:id="@+id/btn_login"
-            android:background="@drawable/btn_background" />
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/buttonHeight"
+            android:layout_alignParentRight="true"
+            android:layout_margin="@dimen/marginEdge"
+            android:background="?attr/btnBackground"
+            android:text="@string/login"
+            android:textColor="?attr/textColor"/>
 
         <Button
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/retry"
-            android:layout_toRightOf="@id/tv_phone"
             android:id="@+id/btn_login_retry"
-            android:visibility="invisible" />
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_toRightOf="@id/tv_phone"
+            android:text="@string/retry"
+            android:visibility="invisible"/>
 
         <ProgressBar
-            android:layout_height="25dp"
+            android:id="@+id/pb_login_status"
             android:layout_width="25dp"
-            android:layout_toRightOf="@id/tv_phone"
+            android:layout_height="25dp"
             android:layout_alignTop="@id/tv_login_status"
-            android:id="@+id/pb_login_status" />
+            android:layout_toRightOf="@id/tv_phone"/>
 
     </RelativeLayout>
 
     <LinearLayout
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:layout_margin="@dimen/marginEdge">
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/marginEdge"
+        android:orientation="horizontal">
 
         <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/flux_status"
             android:id="@+id/tv_flux_detail"
-            android:layout_gravity="center_vertical" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:text="@string/flux_status"/>
 
         <FrameLayout
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <Button
+                android:id="@+id/btn_refresh_flux"
                 style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="wrap_content"
                 android:layout_height="@dimen/buttonHeight"
-                android:layout_width="wrap_content"
-                android:text="@string/refresh"
                 android:enabled="false"
-                android:id="@+id/btn_refresh_flux" />
+                android:text="@string/refresh"/>
 
             <ProgressBar
-                android:layout_height="25dp"
-                android:layout_width="25dp"
-                android:layout_gravity="center"
                 android:id="@+id/pb_refresh_flux"
-                android:visibility="invisible" />
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:visibility="invisible"/>
 
         </FrameLayout>
 
     </LinearLayout>
 
     <LinearLayout
-        android:layout_margin="@dimen/marginEdge"
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/marginEdge"
         android:orientation="horizontal">
 
         <ProgressBar
+            android:id="@+id/pb_flux"
             style="?android:attr/progressBarStyleHorizontal"
-            android:layout_height="wrap_content"
             android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:layout_weight="1.0"
-            android:id="@+id/pb_flux" />
+            android:layout_weight="1.0"/>
 
         <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
             android:id="@+id/tv_flux"
-            android:minWidth="20dp"
-            android:layout_marginLeft="1dp" />
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="1dp"
+            android:minWidth="20dp"/>
 
     </LinearLayout>
 
     <LinearLayout
-        android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        android:orientation="horizontal"
-        android:layout_margin="@dimen/marginEdge">
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/marginEdge"
+        android:orientation="horizontal">
 
         <TextView
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/envelope_status"
             android:id="@+id/tv_welfare_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
-            android:maxEms="18" />
+            android:maxEms="18"
+            android:text="@string/envelope_status"/>
 
         <FrameLayout
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
 
             <Button
+                android:id="@+id/btn_refresh_welfare"
                 style="?android:attr/buttonBarButtonStyle"
-                android:layout_height="wrap_content"
                 android:layout_width="wrap_content"
-                android:text="@string/refresh"
+                android:layout_height="wrap_content"
                 android:enabled="false"
-                android:id="@+id/btn_refresh_welfare" />
+                android:text="@string/refresh"/>
 
             <ProgressBar
-                android:layout_height="25dp"
-                android:layout_width="25dp"
-                android:layout_gravity="center"
                 android:id="@+id/pb_refresh_welfare"
-                android:visibility="invisible" />
+                android:layout_width="25dp"
+                android:layout_height="25dp"
+                android:layout_gravity="center"
+                android:visibility="invisible"/>
 
         </FrameLayout>
 
     </LinearLayout>
 
     <TextView
-        android:layout_margin="@dimen/marginEdge"
-        android:layout_height="wrap_content"
+        android:id="@+id/tv_next_time"
         android:layout_width="wrap_content"
-        android:text="@string/next_round_time"
-        android:id="@+id/tv_next_time" />
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/marginEdge"
+        android:text="@string/next_round_time"/>
 
     <TextView
-        android:layout_margin="@dimen/marginEdge"
-        android:layout_height="wrap_content"
+        android:id="@+id/tv_welfare_type"
         android:layout_width="wrap_content"
-        android:text="@string/type"
-        android:id="@+id/tv_welfare_type" />
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/marginEdge"
+        android:text="@string/type"/>
 
     <LinearLayout
-        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
-        android:orientation="horizontal"
-        android:layout_gravity="center_horizontal">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:orientation="horizontal">
 
         <Button
-            android:layout_margin="@dimen/marginEdge"
-            android:layout_height="@dimen/buttonHeight"
-            android:layout_width="wrap_content"
-            android:text="@string/grab"
-            android:textColor="?attr/textColor"
-            android:enabled="false"
             android:id="@+id/btn_grab"
-            android:background="@drawable/btn_background" />
-
-        <Button
-            android:layout_margin="@dimen/marginEdge"
-            android:layout_height="@dimen/buttonHeight"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
-            android:text="@string/history"
-            android:textColor="?attr/textColor"
+            android:layout_height="@dimen/buttonHeight"
+            android:layout_margin="@dimen/marginEdge"
+            android:background="?attr/btnBackground"
             android:enabled="false"
-            android:id="@+id/btn_welfare_record"
-            android:background="@drawable/btn_background"
-            android:padding="0dp" />
+            android:text="@string/grab"
+            android:textColor="?attr/textColor"/>
 
         <Button
-            android:layout_margin="@dimen/marginEdge"
-            android:layout_height="@dimen/buttonHeight"
+            android:id="@+id/btn_welfare_record"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
-            android:text="@string/auto_grab_envelope"
-            android:textColor="?attr/textColor"
+            android:layout_height="@dimen/buttonHeight"
+            android:layout_margin="@dimen/marginEdge"
+            android:background="?attr/btnBackground"
+            android:enabled="false"
+            android:padding="0dp"
+            android:text="@string/history"
+            android:textColor="?attr/textColor"/>
+
+        <Button
             android:id="@+id/btn_auto_grab_welfare"
-            android:background="@drawable/btn_background"
-            android:padding="0dp" />
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/buttonHeight"
+            android:layout_margin="@dimen/marginEdge"
+            android:background="?attr/btnBackground"
+            android:padding="0dp"
+            android:text="@string/auto_grab_envelope"
+            android:textColor="?attr/textColor"/>
 
     </LinearLayout>
 
     <LinearLayout
-        android:layout_margin="@dimen/marginEdge"
-        android:layout_height="wrap_content"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/marginEdge"
         android:orientation="horizontal">
 
         <TextView
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:id="@+id/tv_welfare_service_status"
             android:layout_width="wrap_content"
-            android:id="@+id/tv_welfare_service_status" />
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         <ProgressBar
-            android:layout_height="20dp"
-            android:layout_width="20dp"
-            android:layout_gravity="center_vertical"
             android:id="@+id/pb_welfare_service_status"
-            android:visibility="invisible" />
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="center_vertical"
+            android:visibility="invisible"/>
 
     </LinearLayout>
 

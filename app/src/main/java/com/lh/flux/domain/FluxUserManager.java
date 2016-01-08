@@ -7,7 +7,6 @@ import android.content.pm.PackageManager;
 import android.support.v4.content.ContextCompat;
 import android.telephony.TelephonyManager;
 
-import com.lh.flux.domain.utils.PermissionUtil;
 import com.lh.flux.model.entity.User;
 
 public class FluxUserManager

@@ -33,21 +33,24 @@
 
         <Button
             android:id="@+id/login_btn_login"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/buttonHeight"
             android:layout_margin="@dimen/marginEdge"
-            android:background="@drawable/btn_background"
+            android:background="?attr/btnBackground"
             android:text="@string/login"
             android:textColor="?attr/textColor"/>
 
         <Button
             android:id="@+id/login_btn_get_cap"
+            style="@style/Widget.AppCompat.Button.Colored"
             android:layout_width="wrap_content"
             android:layout_height="@dimen/buttonHeight"
             android:layout_margin="@dimen/marginEdge"
-            android:background="@drawable/btn_background"
+            android:background="?attr/btnBackground"
             android:text="@string/get_capture"
-            android:textColor="?attr/textColor"/>
+            android:textColor="?attr/textColor"
+            />
 
     </LinearLayout>
 

@@ -9,6 +9,7 @@
         <item name="textColor">@color/white</item>
         <item name="rippleColor">@color/blue_deep</item>
         <item name="viewBackground">@color/white</item>
+        <item name="btnBackground">@drawable/btn_background_blue</item>
     </style>
 
     <style name="ThemeRed" parent="Theme.AppCompat.Light.NoActionBar">
@@ -19,6 +20,7 @@
         <item name="rippleColor">@color/red_deep</item>
         <item name="textColor">@color/white</item>
         <item name="viewBackground">@color/white</item>
+        <item name="btnBackground">@drawable/btn_background_red</item>
     </style>
 
     <style name="DialogBlue" parent="Base.Theme.AppCompat.Light.Dialog">
