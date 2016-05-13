@@ -1,6 +1,6 @@
 package com.lh.flux.model.entity;
 
-import com.alibaba.fastjson.annotation.JSONField;
+import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 
@@ -102,13 +102,13 @@ public class WelfareInfoEntity
 
     public static class Rule
     {
-        @JSONField(name = "_id")
+        @SerializedName("_id")
         private String id;
         private int period;
         private int sustain;
         private int totalNum;
         private int status;
-        @JSONField(name = "__v")
+        @SerializedName("__v")
         private int v;
         private ArrayList<Prize> prize;
 
@@ -186,9 +186,9 @@ public class WelfareInfoEntity
     public static class Prize
     {
         private int number;
-        @JSONField(name = "_id")
+        @SerializedName("_id")
         private String id;
-        @JSONField(name = "id")
+        @SerializedName("id")
         private WelfareEnvelopEntity data;
 
         public void setNumber(int number)

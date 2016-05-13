@@ -63,10 +63,12 @@ public class DatePickerFragment extends DialogFragment
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
                 {
                     am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, ca.getTimeInMillis() - advanceTime, pi);
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+                }
+                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
                 {
                     am.setExact(AlarmManager.RTC_WAKEUP, ca.getTimeInMillis() - advanceTime, pi);
-                } else
+                }
+                else
                 {
                     am.set(AlarmManager.RTC_WAKEUP, ca.getTimeInMillis() - advanceTime, pi);
                 }

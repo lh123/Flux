@@ -1,7 +1,7 @@
 package com.lh.flux.view;
 
+import android.content.Intent;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -13,13 +13,28 @@ import com.lh.flux.R;
 import com.lh.flux.domain.utils.ThemeUtil;
 import com.lh.flux.mvp.presenter.LoginPresenter;
 import com.lh.flux.mvp.view.ILoginActivity;
+import com.lh.flux.view.component.DaggerLoginActivityComponent;
+import com.lh.flux.view.module.LoginActivityModule;
 import com.umeng.analytics.MobclickAgent;
 
-public class LoginActivity extends AppCompatActivity implements ILoginActivity
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class LoginActivity extends BaseActivity implements ILoginActivity
 {
-    private LoginPresenter presenter;
-    private EditText edPhone;
-    private EditText edCap;
+    @Inject LoginPresenter presenter;
+    @BindView(R.id.login_ed_phone) EditText edPhone;
+    @BindView(R.id.login_ed_cap) EditText edCap;
+    @BindView(R.id.login_btn_get_cap) Button btnGetCap;
+    @BindView(R.id.login_btn_login) Button btnLogin;
+
+
+    public static final int LOGIN_SUCCESS=1;
+    public static final int LOGIN_FAIL=2;
+
+    private boolean haveResult=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -29,11 +44,7 @@ public class LoginActivity extends AppCompatActivity implements ILoginActivity
         setContentView(R.layout.login_aty);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        edPhone = (EditText) findViewById(R.id.login_ed_phone);
-        edCap = (EditText) findViewById(R.id.login_ed_cap);
-        Button btnGetCap = (Button) findViewById(R.id.login_btn_get_cap);
-        Button btnLogin = (Button) findViewById(R.id.login_btn_login);
-        presenter = new LoginPresenter(this);
+        ButterKnife.bind(this);
         presenter.onCreat();
         btnGetCap.setOnClickListener(new OnClickListener()
         {
@@ -56,6 +67,16 @@ public class LoginActivity extends AppCompatActivity implements ILoginActivity
     }
 
     @Override
+    protected void setUpComponent()
+    {
+        DaggerLoginActivityComponent.builder()
+                .loginActivityModule(new LoginActivityModule(this))
+                .fluxAppComponent(getAppComponent())
+                .build()
+                .inject(this);
+    }
+
+    @Override
     protected void onResume()
     {
         super.onResume();
@@ -73,6 +94,10 @@ public class LoginActivity extends AppCompatActivity implements ILoginActivity
     protected void onDestroy()
     {
         presenter.onDestroy();
+        if(!haveResult)
+        {
+            setResult(LOGIN_FAIL);
+        }
         super.onDestroy();
     }
 
@@ -98,6 +123,15 @@ public class LoginActivity extends AppCompatActivity implements ILoginActivity
     public void setPhone(String phone)
     {
         edPhone.setText(phone);
+    }
+
+    @Override
+    public void setLoginResult(int resultCode,String phone)
+    {
+        haveResult=true;
+        Intent i=new Intent();
+        i.putExtra("phone",phone);
+        setResult(resultCode,i);
     }
 
 }

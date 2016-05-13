@@ -12,6 +12,9 @@ import com.lh.flux.model.entity.WelfareRecordEntity;
 
 import java.util.ArrayList;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class WelfareRecyclerAdapter extends RecyclerView.Adapter
 {
     private ArrayList<WelfareRecordEntity.Data> data;
@@ -51,16 +54,14 @@ public class WelfareRecyclerAdapter extends RecyclerView.Adapter
 
     public static class Holder extends RecyclerView.ViewHolder
     {
-        private TextView tvWelfareDes;
-        private TextView tvWelfareTime;
-        private TextView tvWelfareStatus;
+        @BindView(R.id.tv_welfare_des) TextView tvWelfareDes;
+        @BindView(R.id.tv_welfare_time) TextView tvWelfareTime;
+        @BindView(R.id.tv_welfare_status) TextView tvWelfareStatus;
 
         public Holder(View view)
         {
             super(view);
-            tvWelfareDes = (TextView) itemView.findViewById(R.id.tv_welfare_des);
-            tvWelfareTime = (TextView) itemView.findViewById(R.id.tv_welfare_time);
-            tvWelfareStatus = (TextView) itemView.findViewById(R.id.tv_welfare_status);
+            ButterKnife.bind(this,itemView);
         }
     }
 

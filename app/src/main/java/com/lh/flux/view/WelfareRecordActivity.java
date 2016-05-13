@@ -15,16 +15,25 @@ import com.lh.flux.model.entity.WelfareRecordEntity;
 import com.lh.flux.mvp.presenter.WelfareRecordPresenter;
 import com.lh.flux.mvp.view.IWelfareRecordActivity;
 import com.lh.flux.view.adapter.WelfareRecyclerAdapter;
+import com.lh.flux.view.component.DaggerWelfareRecordActivityComponent;
+import com.lh.flux.view.module.WelfareRecordActivityModule;
 import com.umeng.analytics.MobclickAgent;
 
 import java.util.ArrayList;
 
-public class WelfareRecordActivity extends AppCompatActivity implements IWelfareRecordActivity, SwipeRefreshLayout.OnRefreshListener
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class WelfareRecordActivity extends BaseActivity implements IWelfareRecordActivity, SwipeRefreshLayout.OnRefreshListener
 {
-    private SwipeRefreshLayout mSwipeRefreshLayout;
+    @BindView(R.id.welfare_record_refresh) SwipeRefreshLayout mSwipeRefreshLayout;
+    @BindView(R.id.welfare_record_recycler_view) RecyclerView mRecyclerView;
+    @BindView(R.id.toolbar) Toolbar toolbar;
     private WelfareRecyclerAdapter mAdapter;
 
-    private WelfareRecordPresenter mPresenter;
+    @Inject WelfareRecordPresenter mPresenter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -32,13 +41,12 @@ public class WelfareRecordActivity extends AppCompatActivity implements IWelfare
         ThemeUtil.getInstance().setTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.welfare_record_aty);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        RecyclerView mRecyclerView = (RecyclerView) findViewById(R.id.welfare_record_recycler_view);
-        mSwipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.welfare_record_refresh);
+        ButterKnife.bind(this);
         setSupportActionBar(toolbar);
         mAdapter = new WelfareRecyclerAdapter();
         LinearLayoutManager lm = new LinearLayoutManager(this);
         lm.setOrientation(LinearLayoutManager.VERTICAL);
+        assert mRecyclerView != null;
         mRecyclerView.setLayoutManager(lm);
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
         mRecyclerView.setAdapter(mAdapter);
@@ -46,6 +54,16 @@ public class WelfareRecordActivity extends AppCompatActivity implements IWelfare
         mPresenter = new WelfareRecordPresenter(this);
         mPresenter.onCreate();
         mPresenter.startRefreshWelfareRecord();
+    }
+
+    @Override
+    protected void setUpComponent()
+    {
+        DaggerWelfareRecordActivityComponent.builder()
+                .welfareRecordActivityModule(new WelfareRecordActivityModule(this))
+                .fluxAppComponent(getAppComponent())
+                .build()
+                .inject(this);
     }
 
     @Override

@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -21,30 +20,43 @@ import com.lh.flux.domain.utils.PermissionUtil;
 import com.lh.flux.domain.utils.ThemeUtil;
 import com.lh.flux.mvp.presenter.FluxPresenter;
 import com.lh.flux.mvp.view.IFluxActivity;
+import com.lh.flux.view.component.DaggerFluxActivityComponent;
+import com.lh.flux.view.module.FluxActivityModule;
 import com.umeng.analytics.MobclickAgent;
 
-public class FluxActivity extends AppCompatActivity implements View.OnClickListener, IFluxActivity
-{
-    private Button btnRefreshFlux;
-    private Button btnRefreshWelfare;
-    private Button btnGrabWelfare;
-    private Button btnWelfareRecord;
-    private Button btnLoginRety;
-    private TextView tvPhone;
-    private TextView tvLoginStatus;
-    private TextView tvFlux;
-    private TextView tvFluxDetail;
-    private TextView tvWelfareStatus;
-    private TextView tvNextTime;
-    private TextView tvWelfareServiceStatus;
-    private TextView tvWelfareType;
-    private ProgressBar pbFlux;
-    private ProgressBar pbWelfareServiceStatus;
-    private ProgressBar pbRefreshFlux;
-    private ProgressBar pbRefreshWelfare;
-    private ProgressBar pbLoginStatus;
+import java.util.Locale;
 
-    private FluxPresenter mPresenter;
+import javax.inject.Inject;
+
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
+public class FluxActivity extends BaseActivity implements View.OnClickListener, IFluxActivity
+{
+    @BindView(R.id.btn_login) Button btnLogin;
+    @BindView(R.id.btn_auto_grab_welfare) Button btnAutoGrabWelfare;
+    @BindView(R.id.btn_refresh_flux) Button btnRefreshFlux;
+    @BindView(R.id.btn_refresh_welfare) Button btnRefreshWelfare;
+    @BindView(R.id.btn_grab) Button btnGrabWelfare;
+    @BindView(R.id.btn_welfare_record) Button btnWelfareRecord;
+    @BindView(R.id.btn_login_retry) Button btnLoginRety;
+    @BindView(R.id.tv_phone) TextView tvPhone;
+    @BindView(R.id.tv_login_status) TextView tvLoginStatus;
+    @BindView(R.id.tv_flux) TextView tvFlux;
+    @BindView(R.id.tv_flux_detail) TextView tvFluxDetail;
+    @BindView(R.id.tv_welfare_status) TextView tvWelfareStatus;
+    @BindView(R.id.tv_next_time) TextView tvNextTime;
+    @BindView(R.id.tv_welfare_service_status) TextView tvWelfareServiceStatus;
+    @BindView(R.id.tv_welfare_type) TextView tvWelfareType;
+    @BindView(R.id.pb_flux) ProgressBar pbFlux;
+    @BindView(R.id.pb_welfare_service_status) ProgressBar pbWelfareServiceStatus;
+    @BindView(R.id.pb_refresh_flux) ProgressBar pbRefreshFlux;
+    @BindView(R.id.pb_refresh_welfare) ProgressBar pbRefreshWelfare;
+    @BindView(R.id.pb_login_status) ProgressBar pbLoginStatus;
+
+    @Inject FluxPresenter mPresenter;
+
+    public static final int LOGIN_REQUSET_CODE=1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -52,29 +64,9 @@ public class FluxActivity extends AppCompatActivity implements View.OnClickListe
         ThemeUtil.getInstance().setTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.flux_aty);
+        ButterKnife.bind(this);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        btnLoginRety = (Button) findViewById(R.id.btn_login_retry);
-        Button btnLogin = (Button) findViewById(R.id.btn_login);
-        btnRefreshFlux = (Button) findViewById(R.id.btn_refresh_flux);
-        btnRefreshWelfare = (Button) findViewById(R.id.btn_refresh_welfare);
-        btnGrabWelfare = (Button) findViewById(R.id.btn_grab);
-        btnWelfareRecord = (Button) findViewById(R.id.btn_welfare_record);
-        Button btnAutoGrabWelfare = (Button) findViewById(R.id.btn_auto_grab_welfare);
-        tvPhone = (TextView) findViewById(R.id.tv_phone);
-        tvLoginStatus = (TextView) findViewById(R.id.tv_login_status);
-        tvFlux = (TextView) findViewById(R.id.tv_flux);
-        tvFluxDetail = (TextView) findViewById(R.id.tv_flux_detail);
-        tvWelfareStatus = (TextView) findViewById(R.id.tv_welfare_status);
-        tvNextTime = (TextView) findViewById(R.id.tv_next_time);
-        tvWelfareServiceStatus = (TextView) findViewById(R.id.tv_welfare_service_status);
-        tvWelfareType = (TextView) findViewById(R.id.tv_welfare_type);
-        pbFlux = (ProgressBar) findViewById(R.id.pb_flux);
-        pbWelfareServiceStatus = (ProgressBar) findViewById(R.id.pb_welfare_service_status);
-        pbRefreshFlux = (ProgressBar) findViewById(R.id.pb_refresh_flux);
-        pbRefreshWelfare = (ProgressBar) findViewById(R.id.pb_refresh_welfare);
-        pbLoginStatus = (ProgressBar) findViewById(R.id.pb_login_status);
-        mPresenter = new FluxPresenter(this);
         mPresenter.onCreate();
         btnLogin.setOnClickListener(this);
         btnRefreshFlux.setOnClickListener(this);
@@ -87,12 +79,22 @@ public class FluxActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
+    protected void setUpComponent()
+    {
+        DaggerFluxActivityComponent.builder()
+                .fluxAppComponent(getAppComponent())
+                .fluxActivityModule(new FluxActivityModule(this))
+                .build()
+                .inject(this);
+    }
+
+    @Override
     public void onClick(View p1)
     {
         switch (p1.getId())
         {
             case R.id.btn_login:
-                mPresenter.startLoginActivity();
+                startLoginActivity();
                 break;
             case R.id.btn_refresh_flux:
                 mPresenter.startRefreshFlux();
@@ -104,7 +106,7 @@ public class FluxActivity extends AppCompatActivity implements View.OnClickListe
                 mPresenter.startGrabWelfare();
                 break;
             case R.id.btn_welfare_record:
-                mPresenter.startWelfareRecordActivity();
+                startWelfareRecordActivity();
                 break;
             case R.id.btn_auto_grab_welfare:
                 mPresenter.startGrabWelfareAtTime();
@@ -113,6 +115,21 @@ public class FluxActivity extends AppCompatActivity implements View.OnClickListe
                 mPresenter.startLogin();
                 break;
         }
+    }
+
+    private void startLoginActivity()
+    {
+        Intent i = new Intent();
+        i.setClass(this, LoginActivity.class);
+        startActivityForResult(i,LOGIN_REQUSET_CODE);
+    }
+
+
+    private void startWelfareRecordActivity()
+    {
+        Intent i = new Intent();
+        i.setClass(this, WelfareRecordActivity.class);
+        startActivity(i);
     }
 
     @Override
@@ -189,7 +206,7 @@ public class FluxActivity extends AppCompatActivity implements View.OnClickListe
     public void setFlux(String msg, float rate)
     {
         tvFluxDetail.setText(msg);
-        tvFlux.setText(String.format("%.1f%%", rate));
+        tvFlux.setText(String.format(Locale.getDefault(),"%.1f%%", rate));
         pbFlux.setProgress((int) rate);
     }
 
@@ -259,6 +276,24 @@ public class FluxActivity extends AppCompatActivity implements View.OnClickListe
             LogUtil.getInstance().init(getApplicationContext());
             mPresenter.startLogin();
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data)
+    {
+        if(requestCode==LOGIN_REQUSET_CODE)
+        {
+            if (resultCode == LoginActivity.LOGIN_SUCCESS)
+            {
+                setPhoneNum(data.getStringExtra("phone"));
+                setLoginStatus(FluxPresenter.LOGIN_SUCCESS);
+            }
+            else
+            {
+                setLoginStatus(FluxPresenter.LOGIN_FAIL);
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

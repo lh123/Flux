@@ -1,36 +1,38 @@
 package com.lh.flux.mvp.presenter;
 
-import android.Manifest;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.os.Handler;
-import android.support.v4.content.ContextCompat;
 
 import com.lh.flux.domain.BusProvide;
-import com.lh.flux.domain.FluxUsecase;
-import com.lh.flux.domain.FluxUserManager;
-import com.lh.flux.domain.LoginUsecase;
-import com.lh.flux.domain.WelfareUsecase;
-import com.lh.flux.domain.event.FluxEvent;
-import com.lh.flux.domain.event.LoginEvent;
-import com.lh.flux.domain.event.WelfareCookieEvent;
-import com.lh.flux.domain.event.WelfareInfoEvent;
 import com.lh.flux.domain.event.WelfareServiceEvent;
+import com.lh.flux.model.entity.FluxEntity;
+import com.lh.flux.model.entity.LoginEntity;
+import com.lh.flux.model.entity.WelfareInfoEntity;
+import com.lh.flux.model.utils.CookieUtil;
+import com.lh.flux.model.utils.PostBodyUtil;
+import com.lh.flux.model.utils.ReferUtil;
 import com.lh.flux.mvp.view.IFluxActivity;
 import com.lh.flux.service.WelfareService;
 import com.lh.flux.view.FluxActivity;
-import com.lh.flux.view.LoginActivity;
-import com.lh.flux.view.WelfareRecordActivity;
 import com.lh.flux.view.fragment.DatePickerFragment;
 import com.squareup.otto.Subscribe;
 import com.umeng.update.UmengUpdateAgent;
 
 import java.util.List;
 
-public class FluxPresenter
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action0;
+import rx.schedulers.Schedulers;
+
+public class FluxPresenter extends BasePresenter
 {
 
     public static final int LOGINING = 0;
@@ -38,12 +40,7 @@ public class FluxPresenter
     public static final int LOGIN_FAIL = 2;
 
     private IFluxActivity mFluxActivity;
-    private LoginUsecase mLoginUsecase;
-    private WelfareUsecase mWelfareUsecase;
-    private FluxUsecase mFluxUsecase;
     private Handler mHandler;
-
-    private boolean isNeedRefreshWelfareInfo = false;
 
     public FluxPresenter(IFluxActivity mFluxActivity)
     {
@@ -54,11 +51,7 @@ public class FluxPresenter
     {
         BusProvide.getBus().register(this);
         mHandler = new Handler();
-        mLoginUsecase = new LoginUsecase(mHandler);
-        mWelfareUsecase = new WelfareUsecase(mHandler);
-        mFluxUsecase = new FluxUsecase(mHandler);
         SharedPreferences sp = mFluxActivity.getContext().getSharedPreferences("auto_grab", Context.MODE_PRIVATE);
-        mFluxActivity.setPhoneNum(FluxUserManager.getInstance().getUser().getPhone());
         UmengUpdateAgent.update(mFluxActivity.getContext());
         if (sp.contains("time"))
         {
@@ -67,31 +60,144 @@ public class FluxPresenter
         startLogin();
     }
 
-    public void startLoginActivity()
-    {
-        Intent i = new Intent();
-        i.setClass(mFluxActivity.getContext(), LoginActivity.class);
-        ((FluxActivity) mFluxActivity).startActivity(i);
-    }
-
     public void startRefreshFlux()
     {
         mFluxActivity.setFluxProgressStatus(true);
-        mFluxUsecase.getFluxInfo(FluxUserManager.getInstance().getUser());
+        service.getFluxInfo(ReferUtil.getFluxInfoRefer(userManager.getUser()),PostBodyUtil.getPhonePostBody(userManager.getUser()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .doOnTerminate(new Action0()
+                {
+                    @Override
+                    public void call()
+                    {
+                        mFluxActivity.setFluxProgressStatus(false);
+                    }
+                })
+                .subscribe(new Subscriber<FluxEntity>()
+                {
+                    @Override
+                    public void onCompleted()
+                    {
+
+                    }
+
+                    @Override
+                    public void onError(Throwable e)
+                    {
+                        e.printStackTrace();
+                        mFluxActivity.showToast("加载失败");
+                    }
+
+                    @Override
+                    public void onNext(FluxEntity fluxEntity)
+                    {
+                        if (fluxEntity.isSuccess())
+                        {
+                            int ava = fluxEntity.getData().getSum().getAvailable();
+                            int total = fluxEntity.getData().getSum().getTotal();
+                            String msg = "流量:总共" + total + "M 可用" + ava + "M";
+                            mFluxActivity.setFlux(msg, (float) (total - ava) * 100 / total);
+                            userManager.getUser().setAvailableFlux(ava);
+                            userManager.getUser().setTotalFlux(total);
+                            userManager.saveUser();
+                        }
+                        else
+                        {
+                            mFluxActivity.showToast(fluxEntity.getMsg());
+                        }
+                    }
+                });
     }
 
     public void startRefreshWelfareInfo()
     {
-        if (FluxUserManager.getInstance().getUser().getCookie() == null)
+        mFluxActivity.setWelfareProgressStatus(true);
+        if (userManager.getUser().getCookie() == null)
         {
-            isNeedRefreshWelfareInfo = true;
-            mFluxActivity.setWelfareProgressStatus(true);
-            mWelfareUsecase.getWelfareCoookie(FluxUserManager.getInstance().getUser());
+
+            service.getWelfareCookie(userManager.getUser().getPhone(), userManager.getUser().getSessionID())
+                    .enqueue(new Callback<ResponseBody>()
+                    {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response)
+                        {
+                            String cookie=response.headers().get("Set-Cookie");
+                            cookie= CookieUtil.decodeCookie(cookie);
+                            userManager.getUser().setCookie(cookie);
+                            userManager.saveUser();
+                            service.getWelfareInfo(ReferUtil.getFluxInfoRefer(userManager.getUser()),cookie)
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .doOnTerminate(new Action0()
+                                    {
+                                        @Override
+                                        public void call()
+                                        {
+                                            mFluxActivity.setWelfareProgressStatus(false);
+                                        }
+                                    })
+                                    .subscribe(new Subscriber<WelfareInfoEntity>()
+                                    {
+                                        @Override
+                                        public void onCompleted()
+                                        {
+                                        }
+
+                                        @Override
+                                        public void onError(Throwable e)
+                                        {
+                                            mFluxActivity.showToast("获取信息失败");
+                                        }
+
+                                        @Override
+                                        public void onNext(WelfareInfoEntity welfareEnvelopEntity)
+                                        {
+                                            WelfareInfoReceive(welfareEnvelopEntity);
+                                        }
+                                    });
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t)
+                        {
+                            mFluxActivity.showToast("网络错误,获取Cookie失败！");
+                            mFluxActivity.setWelfareProgressStatus(false);
+                        }
+                    });
         }
         else
         {
-            mFluxActivity.setWelfareProgressStatus(true);
-            mWelfareUsecase.getWelfareInfo(FluxUserManager.getInstance().getUser());
+            service.getWelfareInfo(ReferUtil.getFluxInfoRefer(userManager.getUser()),userManager.getUser().getCookie())
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doOnTerminate(new Action0()
+                    {
+                        @Override
+                        public void call()
+                        {
+                            mFluxActivity.setWelfareProgressStatus(false);
+                        }
+                    })
+                    .subscribe(new Subscriber<WelfareInfoEntity>()
+                    {
+                        @Override
+                        public void onCompleted()
+                        {
+                        }
+
+                        @Override
+                        public void onError(Throwable e)
+                        {
+                            mFluxActivity.showToast("获取信息失败");
+                        }
+
+                        @Override
+                        public void onNext(WelfareInfoEntity welfareEnvelopEntity)
+                        {
+                            WelfareInfoReceive(welfareEnvelopEntity);
+                        }
+                    });
         }
     }
 
@@ -105,21 +211,44 @@ public class FluxPresenter
 
     public void startLogin()
     {
-        if(!FluxUserManager.getInstance().canLogin())
+        if (!userManager.canLogin())
         {
             return;
         }
-        FluxUserManager.getInstance().refreshUser();
-        if (!FluxUserManager.getInstance().getUser().isLogin())
+        userManager.refreshUser();
+        if (!userManager.getUser().isLogin())
         {
-            if (FluxUserManager.getInstance().getUser().getSessionID() != null)
+            if (userManager.getUser().getSessionID() != null)
             {
                 mFluxActivity.setLoginStatus(LOGINING);
-                mLoginUsecase.login(FluxUserManager.getInstance().getUser());
-                if (FluxUserManager.getInstance().getUser().getTotalFlux() != -1)
+                service.loginWithSessionID(PostBodyUtil.getLoginPostBodyWithSessionID(userManager.getUser()))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Subscriber<LoginEntity>()
+                        {
+                            @Override
+                            public void onCompleted()
+                            {
+
+                            }
+
+                            @Override
+                            public void onError(Throwable e)
+                            {
+                                mFluxActivity.setLoginStatus(LOGIN_FAIL);
+                                mFluxActivity.showToast("请检查网络连接");
+                            }
+
+                            @Override
+                            public void onNext(LoginEntity loginEntity)
+                            {
+                                LoginReceive(loginEntity);
+                            }
+                        });
+                if (userManager.getUser().getTotalFlux() != -1)
                 {
-                    int ava = FluxUserManager.getInstance().getUser().getAvailableFlux();
-                    int total = FluxUserManager.getInstance().getUser().getTotalFlux();
+                    int ava = userManager.getUser().getAvailableFlux();
+                    int total = userManager.getUser().getTotalFlux();
                     String msg = "流量:总共" + total + "M 可用" + ava + "M";
                     mFluxActivity.setFlux(msg, (float) (total - ava) * 100 / total);
                 }
@@ -131,16 +260,12 @@ public class FluxPresenter
         }
         else
         {
+            mFluxActivity.showToast("登录成功");
+            mFluxActivity.setPhoneNum(userManager.getUser().getPhone());
             mFluxActivity.setLoginStatus(LOGIN_SUCCESS);
+            userManager.saveUser();
         }
 
-    }
-
-    public void startWelfareRecordActivity()
-    {
-        Intent i = new Intent();
-        i.setClass(mFluxActivity.getContext(), WelfareRecordActivity.class);
-        mFluxActivity.getContext().startActivity(i);
     }
 
     public void startGrabWelfareAtTime()
@@ -161,109 +286,36 @@ public class FluxPresenter
     }
 
     @Subscribe
-    public void onFluxEventEventReceive(FluxEvent event)
+    public void LoginReceive(LoginEntity entity)
     {
-        mFluxActivity.setFluxProgressStatus(false);
-        if (event.isSuccess())
+        mFluxActivity.setLoginStatus(entity.isSuccess() ? LOGIN_SUCCESS : LOGIN_FAIL);
+        userManager.getUser().setIsLogin(entity.isSuccess());
+        if (entity.isSuccess())
         {
-            if (event.getData().isSuccess())
-            {
-                int ava = event.getData().getData().getSum().getAvailable();
-                int total = event.getData().getData().getSum().getTotal();
-                String msg = "流量:总共" + total + "M 可用" + ava + "M";
-                mFluxActivity.setFlux(msg, (float) (total - ava) * 100 / total);
-                FluxUserManager.getInstance().getUser().setAvailableFlux(ava);
-                FluxUserManager.getInstance().getUser().setTotalFlux(total);
-                FluxUserManager.getInstance().saveUser();
-            }
-            else
-            {
-                mFluxActivity.showToast(event.getData().getMsg());
-            }
+            mFluxActivity.showToast(entity.isSuccess() ? "登录成功" : "登录失败");
+            mFluxActivity.setPhoneNum(userManager.getUser().getPhone());
+            userManager.getUser().setToken(entity.getToken());
+            userManager.getUser().setSessionID(entity.getSessionID());
+            userManager.saveUser();
         }
         else
         {
-            mFluxActivity.showToast("请检查网络连接");
+            mFluxActivity.showToast(entity.getMsg());
         }
     }
 
-    @Subscribe
-    public void onWelfareCookieReceive(WelfareCookieEvent event)
+    public void WelfareInfoReceive(WelfareInfoEntity entity)
     {
-        if (event.isSuccess())
-        {
-            FluxUserManager.getInstance().getUser().setCookie(event.getCookie());
-            if (isNeedRefreshWelfareInfo)
-            {
-                isNeedRefreshWelfareInfo = false;
-                startRefreshWelfareInfo();
-            }
-        }
-        else
-        {
-            if (isNeedRefreshWelfareInfo)
-            {
-                isNeedRefreshWelfareInfo = false;
-                mFluxActivity.setWelfareProgressStatus(false);
-                mFluxActivity.showToast("请检查网络连接");
-            }
-        }
+        mFluxActivity.showToast("刷新成功");
+        int total = entity.getData().getRule().getTotalNum();
+        int remain = entity.getData().getRemain();
+        String time = entity.isGrabing() ? "结束时间:" + entity.getData().getStartTime() : "开始时间:" + entity.getData().getStartTime();
+        String type = "类型:" + entity.getData().getRule().getPrize().get(0).getData().getName();
+        String num = "红包状态:剩余" + remain + "个 总共:" + total + "个";
+        mFluxActivity.setWelfareInfo(num, time, type);
     }
 
-    @Subscribe
-    public void onLoginEventReceive(LoginEvent event)
-    {
-        if (event.isSuccess())
-        {
-            mFluxActivity.setLoginStatus(event.getData().isSuccess() ? LOGIN_SUCCESS : LOGIN_FAIL);
-            FluxUserManager.getInstance().getUser().setIsLogin(event.getData().isSuccess());
-            if (event.getData().isSuccess())
-            {
-                mFluxActivity.showToast(event.getData().isSuccess() ? "登录成功" : "登录失败");
-                mFluxActivity.setPhoneNum(FluxUserManager.getInstance().getUser().getPhone());
-                FluxUserManager.getInstance().getUser().setToken(event.getData().getToken());
-                FluxUserManager.getInstance().getUser().setSessionID(event.getData().getSessionID());
-                FluxUserManager.getInstance().saveUser();
-            }
-            else
-            {
-                mFluxActivity.showToast(event.getData().getMsg());
-            }
-        }
-        else
-        {
-            mFluxActivity.setLoginStatus(LOGIN_FAIL);
-            mFluxActivity.showToast("请检查网络连接");
-        }
-    }
-
-    @Subscribe
-    public void onWelfareInfoEventReceive(WelfareInfoEvent event)
-    {
-        mFluxActivity.setWelfareProgressStatus(false);
-        if (event.isSuccess())
-        {
-            if (event.getData().isSuccess())
-            {
-                mFluxActivity.showToast("刷新成功");
-                int total = event.getData().getData().getRule().getTotalNum();
-                int remain = event.getData().getData().getRemain();
-                String time = event.getData().isGrabing() ? "结束时间:" + event.getData().getData().getStartTime() : "开始时间:" + event.getData().getData().getStartTime();
-                String type = "类型:" + event.getData().getData().getRule().getPrize().get(0).getData().getName();
-                String num = "红包状态:剩余" + remain + "个 总共:" + total + "个";
-                mFluxActivity.setWelfareInfo(num, time, type);
-            }
-            else
-            {
-                mFluxActivity.showToast(event.getData().getMsg());
-            }
-        }
-        else
-        {
-            mFluxActivity.showToast("请检查网络连接");
-        }
-    }
-
+    @SuppressWarnings("unused")
     @Subscribe
     public void onWelfareServiceEventReceive(WelfareServiceEvent event)
     {
@@ -290,9 +342,6 @@ public class FluxPresenter
     {
         mHandler.removeCallbacksAndMessages(null);
         BusProvide.getBus().unregister(this);
-        mLoginUsecase.onDestroy();
-        mWelfareUsecase.onDestroy();
-        mFluxUsecase.onDestroy();
         stopWelfareService();
     }
 }

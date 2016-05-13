@@ -9,37 +9,22 @@ import android.telephony.TelephonyManager;
 
 import com.lh.flux.model.entity.User;
 
+import dagger.Module;
+
+/**
+ * Created by liuhui on 2016/5/12.
+ * FluxUserManager用户管理类
+ */
 public class FluxUserManager
 {
     private User user;
     private SharedPreferences mPreference;
     private Context mContext;
 
-    private static FluxUserManager userManager;
-
-    private FluxUserManager()
+    public FluxUserManager(Context context)
     {
         user = new User();
-    }
-
-    public static FluxUserManager getInstance()
-    {
-        if (userManager == null)
-        {
-            synchronized (FluxUserManager.class)
-            {
-                if (userManager == null)
-                {
-                    userManager = new FluxUserManager();
-                }
-            }
-        }
-        return userManager;
-    }
-
-    public void init(Context context)
-    {
-        mContext = context;
+        this.mContext=context;
         mPreference = context.getSharedPreferences("user", Context.MODE_PRIVATE);
     }
 

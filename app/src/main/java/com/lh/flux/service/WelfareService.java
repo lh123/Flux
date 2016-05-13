@@ -20,20 +20,28 @@ import com.lh.flux.R;
 import com.lh.flux.crash.LogUtil;
 import com.lh.flux.domain.BusProvide;
 import com.lh.flux.domain.FluxUserManager;
-import com.lh.flux.domain.LoginUsecase;
-import com.lh.flux.domain.WelfareUsecase;
-import com.lh.flux.domain.event.GrabEvent;
-import com.lh.flux.domain.event.LoginEvent;
-import com.lh.flux.domain.event.WelfareCookieEvent;
 import com.lh.flux.domain.event.WelfareServiceEvent;
+import com.lh.flux.model.api.FluxApiService;
+import com.lh.flux.model.entity.GrabInfoEntity;
+import com.lh.flux.model.entity.LoginEntity;
+import com.lh.flux.model.utils.CookieUtil;
+import com.lh.flux.model.utils.PostBodyUtil;
+import com.lh.flux.model.utils.ReferUtil;
 import com.lh.flux.view.FluxActivity;
-import com.squareup.otto.Subscribe;
+
+import javax.inject.Inject;
+
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class WelfareService extends Service
 {
     private Handler mHandler;
-    private WelfareUsecase mWelfareUsecase;
-    private LoginUsecase mLoginUsecase;
 
     private long startTime, durTime;
     private long intervalTime = 2000, actTime;
@@ -41,7 +49,6 @@ public class WelfareService extends Service
 
     private boolean isAlive = false;
     private boolean isGrabWelfare = false;
-    private boolean isNeedGrab = false;
 
     private PowerManager.WakeLock lock;
     private WifiManager.WifiLock wlock;
@@ -54,16 +61,19 @@ public class WelfareService extends Service
     public static final int FLAG_WELFARE_RESULT = 1;
     public static final String LOCK_TAG = "auto_grab_welfare";
 
+    @Inject
+    FluxApiService service;
+    @Inject
+    FluxUserManager userManager;
+
     @Override
     public void onCreate()
     {
         super.onCreate();
+        setUpComponent();
         LogUtil.getInstance().init(getApplicationContext());
         Log("service creat");
-        BusProvide.getBus().register(this);
         mHandler = new Handler();
-        mWelfareUsecase = new WelfareUsecase(mHandler);
-        mLoginUsecase = new LoginUsecase(mHandler);
         PowerManager pw = (PowerManager) getSystemService(POWER_SERVICE);
         WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
         nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
@@ -74,11 +84,19 @@ public class WelfareService extends Service
         wlock.setReferenceCounted(false);
         lock.acquire();
         wlock.acquire();
-        intervalTime = Long.parseLong(sp.getString("interval_time", "2")) * 1000l;
+        intervalTime = Long.parseLong(sp.getString("interval_time", "2")) * 1000L;
         loginTimes = Integer.parseInt(sp.getString("retry_times", "3"));
-        durTime = Long.parseLong(sp.getString("time_out", "3")) * 60 * 1000l;
+        durTime = Long.parseLong(sp.getString("time_out", "3")) * 60 * 1000L;
         Log("lock cpu wifi");
         isAlive = true;
+    }
+
+    private void setUpComponent()
+    {
+        DaggerWealfareServiceComponent.builder()
+                .fluxAppComponent(FluxApp.getApp().getAppComponent())
+                .build()
+                .inject(this);
     }
 
     @Override
@@ -144,30 +162,105 @@ public class WelfareService extends Service
 
     private void startAutoGrab()
     {
-        if(FluxUserManager.getInstance().canLogin())
+        if (userManager.canLogin())
         {
             isGrabWelfare = true;
-            if (!FluxUserManager.getInstance().getUser().isLogin())
+            if (!userManager.getUser().isLogin())
             {
-                isNeedGrab = true;
                 showNotification("正在尝试登录", FLAG_SERVICE_RUNNING);
-                FluxUserManager.getInstance().refreshUser();
-                mLoginUsecase.login(FluxUserManager.getInstance().getUser());
+                userManager.refreshUser();
+                service.loginWithSessionID(PostBodyUtil.getLoginPostBodyWithSessionID(userManager.getUser()))
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Subscriber<LoginEntity>()
+                        {
+                            @Override
+                            public void onCompleted()
+                            {
+
+                            }
+
+                            @Override
+                            public void onError(Throwable e)
+                            {
+
+                                loginTimes--;
+                                if(loginTimes>0)
+                                {
+                                    startAutoGrab();
+                                }
+                                else
+                                {
+                                    showNotification("登陆失败", FLAG_SERVICE_RUNNING);
+                                    releaseLockAndStop();
+                                }
+                            }
+
+                            @Override
+                            public void onNext(LoginEntity loginEntity)
+                            {
+                                userManager.getUser().setIsLogin(loginEntity.isSuccess());
+                                if (loginEntity.isSuccess())
+                                {
+                                    userManager.getUser().setToken(loginEntity.getToken());
+                                    userManager.getUser().setSessionID(loginEntity.getSessionID());
+                                    userManager.saveUser();
+                                    startAutoGrab();
+                                }
+                            }
+                        });
             }
-            else if (FluxUserManager.getInstance().getUser().getCookie() == null)
+            else if (userManager.getUser().getCookie() == null)
             {
-                isNeedGrab = true;
                 showNotification("正在获取Cookie", FLAG_SERVICE_RUNNING);
-                mWelfareUsecase.getWelfareCoookie(FluxUserManager.getInstance().getUser());
+                service.getWelfareCookie(userManager.getUser().getPhone(),userManager.getUser().getSessionID())
+                        .enqueue(new Callback<ResponseBody>()
+                        {
+                            @Override
+                            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response)
+                            {
+                                onWelfareCookieReceive(response);
+                            }
+
+                            @Override
+                            public void onFailure(Call<ResponseBody> call, Throwable t)
+                            {
+                                showNotification("获取Cookie失败", FLAG_WELFARE_RESULT);
+                                releaseLockAndStop();
+                            }
+                        });
             }
             else
             {
-                mWelfareUsecase.grabWelfare(FluxUserManager.getInstance().getUser());
+                service.grabWelfare(ReferUtil.getGrabWelfareRefer(userManager.getUser()),userManager.getUser().getCookie())
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Subscriber<GrabInfoEntity>()
+                        {
+                            @Override
+                            public void onCompleted()
+                            {
+
+                            }
+
+                            @Override
+                            public void onError(Throwable e)
+                            {
+                                showNotification("抓取红包失败,正在重试", FLAG_SERVICE_RUNNING);
+                                grabWelfareDelay();
+                            }
+
+                            @Override
+                            public void onNext(GrabInfoEntity grabInfoEntity)
+                            {
+                                onGrabEventReceive(grabInfoEntity);
+                            }
+                        });
             }
         }
         else
         {
-            showNotification("权限被禁止，无法登陆",FLAG_WELFARE_RESULT);
+            showNotification("权限被禁止，无法登陆", FLAG_WELFARE_RESULT);
             releaseLockAndStop();
         }
     }
@@ -205,106 +298,48 @@ public class WelfareService extends Service
         }
     }
 
-    @Subscribe
-    public void onGrabEventReceive(GrabEvent event)
+    public void onGrabEventReceive(GrabInfoEntity entity)
     {
-        if (event.isSuccess())
-        {
-            if ("000".equals(event.getData().getReturnCode()))
+            if ("000".equals(entity.getReturnCode()))
             {
                 isGrabWelfare = false;
                 showNotification("抢到红包", FLAG_WELFARE_RESULT);
                 releaseLockAndStop();
             }
-            else if ("001".equals(event.getData().getReturnCode()))
+            else if ("001".equals(entity.getReturnCode()))
             {
                 showNotification("正在重新获取Cookie", FLAG_SERVICE_RUNNING);
-                FluxUserManager.getInstance().getUser().setCookie(null);
+                userManager.getUser().setCookie(null);
                 grabWelfareDelay();
             }
-            else if ("002".equals(event.getData().getReturnCode()))
+            else if ("002".equals(entity.getReturnCode()))
             {
                 showNotification("正在抢红包", FLAG_SERVICE_RUNNING);
                 grabWelfareDelay();
             }
-            else if ("003".equals(event.getData().getReturnCode()))
+            else if ("003".equals(entity.getReturnCode()))
             {
                 isGrabWelfare = false;
                 showNotification("每天只能抢一次红包", FLAG_WELFARE_RESULT);
                 releaseLockAndStop();
             }
-            else if ("004".equals(event.getData().getReturnCode()))
+            else if ("004".equals(entity.getReturnCode()))
             {
                 isGrabWelfare = false;
                 showNotification("没抢到红包", FLAG_WELFARE_RESULT);
                 releaseLockAndStop();
             }
-        }
-        else
-        {
-            showNotification("抓取红包失败,正在重试", FLAG_SERVICE_RUNNING);
-            grabWelfareDelay();
-        }
     }
 
-    @Subscribe
-    public void onLoginEventReceive(LoginEvent event)
+    private void onWelfareCookieReceive(Response response)
     {
-        if (event.isSuccess())
-        {
-            FluxUserManager.getInstance().getUser().setIsLogin(event.getData().isSuccess());
-            if (event.getData().isSuccess())
-            {
-                FluxUserManager.getInstance().getUser().setToken(event.getData().getToken());
-                FluxUserManager.getInstance().getUser().setSessionID(event.getData().getSessionID());
-                FluxUserManager.getInstance().saveUser();
-                if (isNeedGrab)
-                {
-                    isNeedGrab = false;
-                    startAutoGrab();
-                }
-                return;
-            }
-        }
-        showNotification("登录失败", FLAG_SERVICE_RUNNING);
-        loginTimes--;
-        if (loginTimes > 0)
-        {
-            startAutoGrab();
-        }
-        else
-        {
-            showNotification("获取Cookie失败", FLAG_WELFARE_RESULT);
-            releaseLockAndStop();
-        }
-    }
-
-    @Subscribe
-    public void onWelfareCookieReceive(WelfareCookieEvent event)
-    {
-        if (event.isSuccess())
+        String cookie= CookieUtil.decodeCookie(response.headers().get("Set-Cookie"));
+        if (cookie!=null)
         {
             showNotification("成功获取Cookie", FLAG_SERVICE_RUNNING);
-            FluxUserManager.getInstance().getUser().setCookie(event.getCookie());
-            FluxUserManager.getInstance().saveUser();
-            if (isNeedGrab)
-            {
-                isNeedGrab = false;
-                startAutoGrab();
-            }
-        }
-        else
-        {
-            loginTimes--;
-            if (loginTimes > 0)
-            {
-                startAutoGrab();
-            }
-            else
-            {
-                showNotification("获取Cookie失败", FLAG_WELFARE_RESULT);
-                releaseLockAndStop();
-            }
+            userManager.getUser().setCookie(cookie);
+            userManager.saveUser();
+            startAutoGrab();
         }
     }
 
@@ -389,13 +424,9 @@ public class WelfareService extends Service
         isAlive = false;
         nm.cancel(FLAG_SERVICE_RUNNING);
         BusProvide.getBus().unregister(this);
-        mWelfareUsecase.onDestroy();
-        mLoginUsecase.onDestroy();
         mHandler.removeCallbacksAndMessages(null);
         Log("service destroy");
         super.onDestroy();
         FluxApp.getRefWatcher(this).watch(this, "service");
-        FluxApp.getRefWatcher(this).watch(mWelfareUsecase);
-        FluxApp.getRefWatcher(this).watch(mLoginUsecase);
     }
 }

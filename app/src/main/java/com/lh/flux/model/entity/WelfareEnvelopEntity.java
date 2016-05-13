@@ -1,13 +1,13 @@
 package com.lh.flux.model.entity;
 
-import com.alibaba.fastjson.annotation.JSONField;
+import com.google.gson.annotations.SerializedName;
 
 @SuppressWarnings("unused")
 public class WelfareEnvelopEntity
 {
-    @JSONField(name = "__v")
+    @SerializedName("__v")
     private int v;
-    @JSONField(name = "_id")
+    @SerializedName("_id")
     private String id;
     private String description;
     private boolean enabled;

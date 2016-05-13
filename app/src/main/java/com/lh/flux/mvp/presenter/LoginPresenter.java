@@ -1,76 +1,105 @@
 package com.lh.flux.mvp.presenter;
 
-import android.os.Handler;
-
-import com.lh.flux.domain.BusProvide;
-import com.lh.flux.domain.FluxUserManager;
-import com.lh.flux.domain.LoginUsecase;
-import com.lh.flux.domain.event.CapEvent;
-import com.lh.flux.domain.event.LoginEvent;
+import com.lh.flux.model.api.FluxApiService;
+import com.lh.flux.model.entity.CapEntity;
+import com.lh.flux.model.entity.LoginEntity;
 import com.lh.flux.model.entity.User;
+import com.lh.flux.model.utils.PostBodyUtil;
+import com.lh.flux.model.utils.ReferUtil;
 import com.lh.flux.mvp.view.ILoginActivity;
-import com.squareup.otto.Subscribe;
+import com.lh.flux.view.LoginActivity;
 
-public class LoginPresenter
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
+public class LoginPresenter extends BasePresenter
 {
-    private LoginUsecase loginUsecase;
     private ILoginActivity loginAty;
-    private User u;
+    private FluxApiService service;
+    private User user;
 
-    public LoginPresenter(ILoginActivity loginAty)
+    public LoginPresenter(ILoginActivity loginAty, FluxApiService service)
     {
         this.loginAty = loginAty;
-        u = FluxUserManager.getInstance().getUser();
+        this.service = service;
     }
 
     public void onCreat()
     {
-        BusProvide.getBus().register(this);
-        Handler mHandler = new Handler();
-        loginUsecase = new LoginUsecase(mHandler);
-        loginAty.setPhone(u.getPhone());
+        user=userManager.getUser();
+        loginAty.setPhone(user.getPhone());
     }
 
     public void getCap()
     {
-        u.setPhone(loginAty.getPhone());
-        loginUsecase.getCap(u);
+        user.setPhone(loginAty.getPhone());
+        service.getCap(user.getPhone())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<CapEntity>()
+                {
+                    @Override
+                    public void onCompleted()
+                    {
+                    }
+
+                    @Override
+                    public void onError(Throwable e)
+                    {
+                        loginAty.showToast("网络错误");
+                    }
+
+                    @Override
+                    public void onNext(CapEntity capEntity)
+                    {
+                        loginAty.showToast(capEntity.getMsg());
+                    }
+                });
     }
 
     public void login()
     {
-        loginUsecase.loginWithCap(u, loginAty.getCap());
-    }
+        service.loginWithCap(PostBodyUtil.getLoginPostBodyWithCap(user,loginAty.getCap()))
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber<LoginEntity>()
+                {
+                    @Override
+                    public void onCompleted()
+                    {
 
-    @Subscribe
-    public void onCapEventReceive(CapEvent event)
-    {
-        loginAty.showToast(event.getData().getMsg());
-    }
+                    }
 
-    @Subscribe
-    public void onLoginEventReceive(LoginEvent event)
-    {
-        if (event.isSuccess())
-        {
-            if (event.getData().isSuccess())
-            {
-                u.setToken(event.getData().getToken());
-                u.setSessionID(event.getData().getSessionID());
-                loginAty.finish();
-            } else
-            {
-                loginAty.showToast(event.getData().getMsg());
-            }
-        } else
-        {
-            loginAty.showToast("未知错误");
-        }
+                    @Override
+                    public void onError(Throwable e)
+                    {
+                        e.printStackTrace();
+                        loginAty.showToast("网络错误");
+                    }
+
+                    @Override
+                    public void onNext(LoginEntity loginEntity)
+                    {
+                        if(loginEntity.isSuccess())
+                        {
+                            user.setPhone(loginAty.getPhone());
+                            user.setToken(loginEntity.getToken());
+                            user.setSessionID(loginEntity.getSessionID());
+                            userManager.saveUser();
+                            loginAty.setLoginResult(LoginActivity.LOGIN_SUCCESS,user.getPhone());
+                            loginAty.finish();
+                        }
+                        else
+                        {
+                            loginAty.showToast(loginEntity.getMsg());
+                        }
+                    }
+                });
     }
 
     public void onDestroy()
     {
-        BusProvide.getBus().unregister(this);
-        loginUsecase.onDestroy();
+
     }
 }

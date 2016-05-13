@@ -3,25 +3,25 @@ package com.lh.flux.mvp.presenter;
 import android.os.Handler;
 
 import com.lh.flux.domain.BusProvide;
-import com.lh.flux.domain.FluxUserManager;
-import com.lh.flux.domain.WelfareRecordUsecase;
-import com.lh.flux.domain.WelfareUsecase;
-import com.lh.flux.domain.event.WelfareCookieEvent;
-import com.lh.flux.domain.event.WelfareRecordEvent;
 import com.lh.flux.model.entity.WelfareRecordEntity;
+import com.lh.flux.model.utils.CookieUtil;
+import com.lh.flux.model.utils.PostBodyUtil;
+import com.lh.flux.model.utils.ReferUtil;
 import com.lh.flux.mvp.view.IWelfareRecordActivity;
-import com.squareup.otto.Subscribe;
 
 import java.util.ArrayList;
 
-public class WelfareRecordPresenter
+import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
+
+public class WelfareRecordPresenter extends BasePresenter
 {
     private IWelfareRecordActivity mWelfareRecordActivity;
-    private Handler mHandler;
-    private WelfareRecordUsecase mWelfareRecordUsecase;
-    private WelfareUsecase mWelfareUsecase;
-
-    private boolean isNeedRefreshWelfareRecord = false;
 
     public WelfareRecordPresenter(IWelfareRecordActivity mWelfareRecordActivity)
     {
@@ -31,14 +31,11 @@ public class WelfareRecordPresenter
     public void onCreate()
     {
         BusProvide.getBus().register(this);
-        mHandler = new Handler();
-        mWelfareRecordUsecase = new WelfareRecordUsecase(mHandler);
-        mWelfareUsecase = new WelfareUsecase(mHandler);
     }
 
     public void startRefreshWelfareRecord()
     {
-        mHandler.post(new Runnable()
+        new Handler().post(new Runnable()
         {
 
             @Override
@@ -47,49 +44,104 @@ public class WelfareRecordPresenter
                 mWelfareRecordActivity.setRefreshStatus(true);
             }
         });
-        if (FluxUserManager.getInstance().getUser().getCookie() == null)
+        if (userManager.getUser().getCookie() == null)
         {
-            isNeedRefreshWelfareRecord = true;
-            mWelfareUsecase.getWelfareCoookie(FluxUserManager.getInstance().getUser());
-        } else
-        {
-            mWelfareRecordUsecase.getWelfareRecord(FluxUserManager.getInstance().getUser());
-        }
-    }
+            service.getWelfareCookie(userManager.getUser().getPhone(),userManager.getUser().getSessionID())
+                    .enqueue(new Callback<ResponseBody>()
+                    {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response)
+                        {
+                            userManager.getUser().setCookie(CookieUtil.decodeCookie(response.headers().get("Set-Cookie")));
+                            service.getWelfareRecord(ReferUtil.getWelfareRecordRefer(userManager.getUser()),
+                                    userManager.getUser().getCookie(),
+                                    PostBodyUtil.getPhonePostBody(userManager.getUser()))
+                                    .subscribeOn(Schedulers.io())
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(new Subscriber<WelfareRecordEntity>()
+                                    {
+                                        @Override
+                                        public void onCompleted()
+                                        {
+                                        }
 
-    @Subscribe
-    public void onWelfareCookieReceive(WelfareCookieEvent event)
-    {
-        if (event.isSuccess())
-        {
-            FluxUserManager.getInstance().getUser().setCookie(event.getCookie());
-            if (isNeedRefreshWelfareRecord)
-            {
-                isNeedRefreshWelfareRecord = false;
-                startRefreshWelfareRecord();
-            }
-        }
-    }
+                                        @Override
+                                        public void onError(Throwable e)
+                                        {
+                                            e.printStackTrace();
+                                            mWelfareRecordActivity.showToast("网路错误");
+                                            mWelfareRecordActivity.setRefreshStatus(false);
+                                        }
 
-    @Subscribe
-    public void onWelfareRecordEventReceive(WelfareRecordEvent event)
-    {
-        mWelfareRecordActivity.setRefreshStatus(false);
-        if (event.isSuccess() && event.getData().isSuccess())
+                                        @Override
+                                        public void onNext(WelfareRecordEntity welfareRecordEntity)
+                                        {
+                                            mWelfareRecordActivity.setRefreshStatus(false);
+                                            if ( welfareRecordEntity.isSuccess())
+                                            {
+                                                mWelfareRecordActivity.setData(welfareRecordEntity.getData());
+                                            }
+                                            else
+                                            {
+                                                mWelfareRecordActivity.setData(new ArrayList<WelfareRecordEntity.Data>());
+                                                mWelfareRecordActivity.showToast("获取失败");
+                                            }
+                                        }
+                                    });
+                        }
+
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t)
+                        {
+                            t.printStackTrace();
+                            mWelfareRecordActivity.showToast("网路错误");
+                            mWelfareRecordActivity.setRefreshStatus(false);
+                        }
+                    });
+
+        }
+        else
         {
-            mWelfareRecordActivity.setData(event.getData().getData());
-        } else
-        {
-            mWelfareRecordActivity.setData(new ArrayList<WelfareRecordEntity.Data>());
-            mWelfareRecordActivity.showToast("获取失败");
+            service.getWelfareRecord(ReferUtil.getWelfareRecordRefer(userManager.getUser()),
+                    userManager.getUser().getCookie(),
+                    PostBodyUtil.getPhonePostBody(userManager.getUser()))
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Subscriber<WelfareRecordEntity>()
+                    {
+                        @Override
+                        public void onCompleted()
+                        {
+                        }
+
+                        @Override
+                        public void onError(Throwable e)
+                        {
+                            e.printStackTrace();
+                            mWelfareRecordActivity.showToast("网路错误");
+                            mWelfareRecordActivity.setRefreshStatus(false);
+                        }
+
+                        @Override
+                        public void onNext(WelfareRecordEntity welfareRecordEntity)
+                        {
+                            mWelfareRecordActivity.setRefreshStatus(false);
+                            if ( welfareRecordEntity.isSuccess())
+                            {
+                                mWelfareRecordActivity.setData(welfareRecordEntity.getData());
+                            }
+                            else
+                            {
+                                mWelfareRecordActivity.setData(new ArrayList<WelfareRecordEntity.Data>());
+                                mWelfareRecordActivity.showToast("获取失败");
+                            }
+                        }
+                    });
         }
     }
 
     public void onDestroy()
     {
-        mHandler.removeCallbacksAndMessages(null);
         BusProvide.getBus().unregister(this);
-        mWelfareRecordUsecase.onDestroy();
-        mWelfareUsecase.onDestroy();
     }
 }

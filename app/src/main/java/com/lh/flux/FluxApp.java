@@ -8,6 +8,7 @@ import android.util.Log;
 import com.lh.flux.crash.MyCrashHandler;
 import com.lh.flux.domain.FluxUserManager;
 import com.lh.flux.domain.utils.ThemeUtil;
+import com.lh.flux.model.api.FluxApiModule;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
 import com.tencent.bugly.crashreport.CrashReport;
@@ -18,19 +19,40 @@ import java.lang.reflect.Method;
 public class FluxApp extends Application
 {
     private RefWatcher refWatcher;
+    private FluxAppComponent appComponent;
+    private static FluxApp app;
 
     @Override
     public void onCreate()
     {
         super.onCreate();
+        app=this;
         trySolveLeak();
         refWatcher = LeakCanary.install(this);
-        FluxUserManager.getInstance().init(this);
         MyCrashHandler.getInstance().init(this);
         Thread.setDefaultUncaughtExceptionHandler(MyCrashHandler.getInstance());
         MobclickAgent.setCatchUncaughtExceptions(false);
         CrashReport.initCrashReport(this, "900014048", false);
         ThemeUtil.getInstance().init(this);
+        initAppComponent();
+    }
+
+    private void initAppComponent()
+    {
+        appComponent=DaggerFluxAppComponent.builder()
+                .fluxApiModule(new FluxApiModule())
+                .fluxAppModule(new FluxAppModule(this))
+                .build();
+    }
+
+    public FluxAppComponent getAppComponent()
+    {
+        return appComponent;
+    }
+
+    public static FluxApp getApp()
+    {
+        return app;
     }
 
     public static RefWatcher getRefWatcher(Context context)

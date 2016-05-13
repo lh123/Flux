@@ -31,8 +31,19 @@
     @com.squareup.otto.Subscribe public *;
     @com.squareup.otto.Produce public *;
 }
-#fastjson
+#Gson
 -keepattributes Signature
+-keepattributes *Annotation*
 -keep class com.lh.flux.model.entity.**{*;}
--dontwarn com.alibaba.fastjson.**
--keep class com.alibaba.fastjson.** { *; }
+-keep class sun.misc.Unsafe { *; }
+#retrofit
+-dontwarn okio.**
+-dontwarn retrofit2.**
+-keep class retrofit2.** { *; }
+-keep class com.lh.flux.model.api.FluxApiService
+-keepattributes Exceptions
+#Rxjava
+-dontwarn sun.misc.Unsafe
+-keep class sun.misc.** { *; }
+-keep class rx.internal.util.unsafe.** { *; }
+-keep class org.w3c.dom.bootstrap.DOMImplementationRegistry
