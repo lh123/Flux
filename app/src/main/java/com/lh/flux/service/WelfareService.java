@@ -1,5 +1,6 @@
 package com.lh.flux.service;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -29,6 +31,10 @@ import com.lh.flux.model.utils.PostBodyUtil;
 import com.lh.flux.model.utils.ReferUtil;
 import com.lh.flux.view.FluxActivity;
 
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Locale;
+
 import javax.inject.Inject;
 
 import okhttp3.ResponseBody;
@@ -49,6 +55,7 @@ public class WelfareService extends Service
 
     private boolean isAlive = false;
     private boolean isGrabWelfare = false;
+    private boolean isFullAuto=false;
 
     private PowerManager.WakeLock lock;
     private WifiManager.WifiLock wlock;
@@ -87,6 +94,7 @@ public class WelfareService extends Service
         intervalTime = Long.parseLong(sp.getString("interval_time", "2")) * 1000L;
         loginTimes = Integer.parseInt(sp.getString("retry_times", "3"));
         durTime = Long.parseLong(sp.getString("time_out", "3")) * 60 * 1000L;
+        isFullAuto=sp.getBoolean("full_auto",false);
         Log("lock cpu wifi");
         isAlive = true;
     }
@@ -119,6 +127,11 @@ public class WelfareService extends Service
                 if (mode == START_GRAB_DELY)
                 {
                     startAutoGrabWithDely();
+                    if(isFullAuto)
+                    {
+                        Log("自动定时下次");
+                        setAlarm();
+                    }
                 }
                 else
                 {
@@ -416,6 +429,41 @@ public class WelfareService extends Service
         {
             BusProvide.getBus().post(o);
         }
+    }
+
+    private void setAlarm()
+    {
+        SharedPreferences timeSp = getSharedPreferences("auto_grab", Context.MODE_PRIVATE);
+        long advanceTime =Long.parseLong(timeSp.getString("advance_time", "3")) * 60 * 1000;
+        AlarmManager alarmManager= (AlarmManager) getSystemService(ALARM_SERVICE);
+        Calendar calendar=Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        calendar.add(Calendar.DATE,1);
+        calendar.set(Calendar.HOUR_OF_DAY,12);
+        calendar.set(Calendar.MINUTE,0);
+        calendar.set(Calendar.SECOND,0);
+        calendar.set(Calendar.MILLISECOND,0);
+        Intent i=new Intent();
+        i.setClass(this,WelfareService.class);
+        i.putExtra("mode",START_GRAB_DELY);
+        i.putExtra("act", calendar.getTimeInMillis());
+        PendingIntent pendingIntent=PendingIntent.getService(getApplicationContext(),0,i,PendingIntent.FLAG_UPDATE_CURRENT);
+        alarmManager.cancel(pendingIntent);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
+        {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() - advanceTime, pendingIntent);
+        }
+        else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+        {
+            alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() - advanceTime, pendingIntent);
+        }
+        else
+        {
+            alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() - advanceTime, pendingIntent);
+        }
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        LogUtil.getInstance().logE("FluxPresenter", "auto grab " + df.format(calendar.getTime()));
+        timeSp.edit().putString("time", "自动抢红包:" + df.format(calendar.getTime())).apply();
     }
 
     @Override

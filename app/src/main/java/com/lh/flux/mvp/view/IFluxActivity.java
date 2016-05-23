@@ -2,6 +2,8 @@ package com.lh.flux.mvp.view;
 
 import android.content.Context;
 
+import com.lh.flux.domain.UpdateManager;
+
 public interface IFluxActivity
 {
 
@@ -20,6 +22,8 @@ public interface IFluxActivity
     void setWelfareInfo(String num, String time, String type);
 
     void setWelfareServiceStatus(String msg, boolean isGrabing);
+
+    UpdateManager getUpdateManager();
 
     Context getContext();
 }

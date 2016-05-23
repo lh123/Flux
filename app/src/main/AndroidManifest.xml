@@ -1,31 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          xmlns:tools="http://schemas.android.com/tools"
-          package="com.lh.flux">
+<manifest package="com.lh.flux"
+          xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.READ_LOGS" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.READ_LOGS"/>
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
     <application
-        tools:replace="android:allowBackup"
+        android:name=".FluxApp"
         android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:name=".FluxApp"
         android:supportsRtl="true"
-        android:theme="@style/ThemeBlue">
+        android:theme="@style/ThemeBlue"
+        tools:replace="android:allowBackup"
+        tools:ignore="GoogleAppIndexingWarning">
         <activity
             android:name=".view.FluxActivity"
             android:label="@string/app_name">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity android:name=".view.LoginActivity"/>
@@ -37,25 +37,18 @@
             android:label="历史记录"/>
         <activity
             android:name=".crash.CrashActivity"
-            android:label="程序崩溃了"
             android:excludeFromRecents="true"
-            android:theme="@style/DialogBlue" />
+            android:label="程序崩溃了"
+            android:theme="@style/DialogBlue"/>
 
         <service android:name=".service.WelfareService"/>
 
         <meta-data
-            android:value="565c8e8ae0f55a24cc0012fb"
-            android:name="UMENG_APPKEY" />
+            android:name="UMENG_APPKEY"
+            android:value="565c8e8ae0f55a24cc0012fb"/>
         <meta-data
-            android:value="lh"
-            android:name="UMENG_CHANNEL" />
-
-        <service
-            android:name="com.umeng.update.net.DownloadingService"
-            android:process=":DownloadingService"/>
-        <activity
-            android:name="com.umeng.update.UpdateDialogActivity"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
+            android:name="UMENG_CHANNEL"
+            android:value="lh"/>
     </application>
 
 </manifest>

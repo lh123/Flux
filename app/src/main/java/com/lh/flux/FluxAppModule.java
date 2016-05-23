@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 
 import com.lh.flux.domain.FluxUserManager;
+import com.lh.flux.domain.UpdateManager;
 import com.lh.flux.model.entity.User;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
@@ -53,5 +54,12 @@ public class FluxAppModule
     RefWatcher provideRefWatcher()
     {
         return LeakCanary.install(application);
+    }
+
+    @Singleton
+    @Provides
+    UpdateManager provideUpdateManager()
+    {
+        return new UpdateManager(application);
     }
 }

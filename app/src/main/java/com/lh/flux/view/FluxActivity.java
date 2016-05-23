@@ -16,6 +16,7 @@ import android.widget.Toast;
 
 import com.lh.flux.R;
 import com.lh.flux.crash.LogUtil;
+import com.lh.flux.domain.UpdateManager;
 import com.lh.flux.domain.utils.PermissionUtil;
 import com.lh.flux.domain.utils.ThemeUtil;
 import com.lh.flux.mvp.presenter.FluxPresenter;
@@ -55,6 +56,8 @@ public class FluxActivity extends BaseActivity implements View.OnClickListener, 
     @BindView(R.id.pb_login_status) ProgressBar pbLoginStatus;
 
     @Inject FluxPresenter mPresenter;
+
+    @Inject UpdateManager updateManager;
 
     public static final int LOGIN_REQUSET_CODE=1;
 
@@ -230,6 +233,12 @@ public class FluxActivity extends BaseActivity implements View.OnClickListener, 
     {
         tvWelfareServiceStatus.setText(String.format("%s%s", getString(R.string.current_status), msg));
         pbWelfareServiceStatus.setVisibility(isGrabing ? View.VISIBLE : View.INVISIBLE);
+    }
+
+    @Override
+    public UpdateManager getUpdateManager()
+    {
+        return updateManager;
     }
 
     @Override

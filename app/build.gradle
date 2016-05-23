@@ -10,8 +10,8 @@ android {
         applicationId "com.lh.flux"
         minSdkVersion 16
         targetSdkVersion 23
-        versionCode 12
-        versionName "2.0"
+        versionCode 16
+        versionName "2.2"
     }
     buildTypes {
         release {
@@ -42,9 +42,9 @@ dependencies {
     compile 'com.squareup.retrofit2:converter-gson:2.0.2'
     compile 'com.google.code.gson:gson:2.4'
     compile 'com.google.dagger:dagger:2.4'
+    apt 'com.jakewharton:butterknife-compiler:8.0.1'
     apt 'com.google.dagger:dagger-compiler:2.4'
     compile 'com.jakewharton:butterknife:8.0.1'
-    apt 'com.jakewharton:butterknife-compiler:8.0.1'
 }
 bugly {
     appId = '900014048'    //注册时分配的App ID

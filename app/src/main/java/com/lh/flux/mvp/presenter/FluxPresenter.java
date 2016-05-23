@@ -2,14 +2,19 @@ package com.lh.flux.mvp.presenter;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Handler;
+import android.support.v7.app.AlertDialog;
+import android.widget.Toast;
 
 import com.lh.flux.domain.BusProvide;
+import com.lh.flux.domain.UpdateManager;
 import com.lh.flux.domain.event.WelfareServiceEvent;
 import com.lh.flux.model.entity.FluxEntity;
 import com.lh.flux.model.entity.LoginEntity;
+import com.lh.flux.model.entity.UpdateEntity;
 import com.lh.flux.model.entity.WelfareInfoEntity;
 import com.lh.flux.model.utils.CookieUtil;
 import com.lh.flux.model.utils.PostBodyUtil;
@@ -19,7 +24,6 @@ import com.lh.flux.service.WelfareService;
 import com.lh.flux.view.FluxActivity;
 import com.lh.flux.view.fragment.DatePickerFragment;
 import com.squareup.otto.Subscribe;
-import com.umeng.update.UmengUpdateAgent;
 
 import java.util.List;
 
@@ -52,12 +56,45 @@ public class FluxPresenter extends BasePresenter
         BusProvide.getBus().register(this);
         mHandler = new Handler();
         SharedPreferences sp = mFluxActivity.getContext().getSharedPreferences("auto_grab", Context.MODE_PRIVATE);
-        UmengUpdateAgent.update(mFluxActivity.getContext());
+        checkUpdate();
         if (sp.contains("time"))
         {
             mFluxActivity.setWelfareServiceStatus(sp.getString("time", ""), false);
         }
         startLogin();
+    }
+
+    private void checkUpdate()
+    {
+        mFluxActivity.getUpdateManager().checkUpdate(new UpdateManager.UpdateCallBack()
+        {
+            @Override
+            public void onSuccess(final UpdateEntity updateEntity, boolean isNeedUpdate)
+            {
+                if(isNeedUpdate)
+                {
+                    AlertDialog.Builder builder=new AlertDialog.Builder(mFluxActivity.getContext());
+                    builder.setTitle("发现新版本！");
+                    builder.setMessage("发现新版本,是否更新？");
+                    builder.setPositiveButton("更新", new DialogInterface.OnClickListener()
+                    {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which)
+                        {
+                            mFluxActivity.getUpdateManager().downloadApk(updateEntity.getApkFile());
+                        }
+                    });
+                    builder.setNegativeButton("取消",null);
+                    builder.show();
+                }
+            }
+
+            @Override
+            public void onFail()
+            {
+                Toast.makeText(mFluxActivity.getContext(),"检查更新失败",Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     public void startRefreshFlux()

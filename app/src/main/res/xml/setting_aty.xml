@@ -6,7 +6,7 @@
             android:title="主题"
             android:summary="选择主题"
             android:entries="@array/theme_name"
-            android:entryValues="@array/theme_value" />
+            android:entryValues="@array/theme_value"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="通用设置">
         <EditTextPreference
@@ -15,27 +15,30 @@
             android:summary="单位为分"
             android:numeric="integer"
             android:dialogTitle="输入设置"
-            android:defaultValue="5" />
+            android:defaultValue="5"/>
         <EditTextPreference
             android:key="time_out"
             android:title="超时时长"
             android:summary="单位为分"
             android:numeric="integer"
             android:dialogTitle="输入设置"
-            android:defaultValue="3" />
+            android:defaultValue="3"/>
         <EditTextPreference
             android:key="interval_time"
             android:title="间隔时间"
             android:summary="单位为秒"
             android:numeric="integer"
             android:dialogTitle="输入设置"
-            android:defaultValue="2" />
+            android:defaultValue="2"/>
         <EditTextPreference
             android:key="retry_times"
             android:title="登录失败重试次数"
             android:summary="点击输入"
             android:numeric="integer"
             android:dialogTitle="输入设置"
-            android:defaultValue="3" />
+            android:defaultValue="3"/>
+        <CheckBoxPreference
+            android:key="full_auto"
+            android:title="全自动模式"/>
     </PreferenceCategory>
 </PreferenceScreen>
