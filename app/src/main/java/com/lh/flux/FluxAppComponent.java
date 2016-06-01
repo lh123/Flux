@@ -24,8 +24,7 @@ import retrofit2.Retrofit;
  */
 @Singleton
 @Component(modules = {FluxApiModule.class, FluxAppModule.class})
-public interface FluxAppComponent
-{
+public interface FluxAppComponent {
     void inject(Activity activity);
 
     void inject(Fragment fragment);

@@ -9,12 +9,10 @@ import com.lh.flux.domain.utils.ThemeUtil;
 import com.lh.flux.view.fragment.SettingFragment;
 import com.umeng.analytics.MobclickAgent;
 
-public class SettingActivity extends AppCompatActivity
-{
+public class SettingActivity extends AppCompatActivity {
 
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         ThemeUtil.getInstance().setTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.setting_aty);
@@ -25,15 +23,13 @@ public class SettingActivity extends AppCompatActivity
     }
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
         MobclickAgent.onResume(this);
     }
 
     @Override
-    protected void onPause()
-    {
+    protected void onPause() {
         super.onPause();
         MobclickAgent.onPause(this);
     }

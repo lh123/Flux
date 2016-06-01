@@ -36,8 +36,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action0;
 import rx.schedulers.Schedulers;
 
-public class FluxPresenter extends BasePresenter
-{
+public class FluxPresenter extends BasePresenter {
 
     public static final int LOGINING = 0;
     public static final int LOGIN_SUCCESS = 1;
@@ -46,91 +45,73 @@ public class FluxPresenter extends BasePresenter
     private IFluxActivity mFluxActivity;
     private Handler mHandler;
 
-    public FluxPresenter(IFluxActivity mFluxActivity)
-    {
+    public FluxPresenter(IFluxActivity mFluxActivity) {
         this.mFluxActivity = mFluxActivity;
     }
 
-    public void onCreate()
-    {
+    public void onCreate() {
         BusProvide.getBus().register(this);
         mHandler = new Handler();
         SharedPreferences sp = mFluxActivity.getContext().getSharedPreferences("auto_grab", Context.MODE_PRIVATE);
         checkUpdate();
-        if (sp.contains("time"))
-        {
+        if (sp.contains("time")) {
             mFluxActivity.setWelfareServiceStatus(sp.getString("time", ""), false);
         }
         startLogin();
     }
 
-    private void checkUpdate()
-    {
-        mFluxActivity.getUpdateManager().checkUpdate(new UpdateManager.UpdateCallBack()
-        {
+    private void checkUpdate() {
+        mFluxActivity.getUpdateManager().checkUpdate(new UpdateManager.UpdateCallBack() {
             @Override
-            public void onSuccess(final UpdateEntity updateEntity, boolean isNeedUpdate)
-            {
-                if(isNeedUpdate)
-                {
-                    AlertDialog.Builder builder=new AlertDialog.Builder(mFluxActivity.getContext());
+            public void onSuccess(final UpdateEntity updateEntity, boolean isNeedUpdate) {
+                if (isNeedUpdate) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(mFluxActivity.getContext());
                     builder.setTitle("发现新版本！");
                     builder.setMessage("发现新版本,是否更新？");
-                    builder.setPositiveButton("更新", new DialogInterface.OnClickListener()
-                    {
+                    builder.setPositiveButton("更新", new DialogInterface.OnClickListener() {
                         @Override
-                        public void onClick(DialogInterface dialog, int which)
-                        {
+                        public void onClick(DialogInterface dialog, int which) {
                             mFluxActivity.getUpdateManager().downloadApk(updateEntity.getApkFile());
                         }
                     });
-                    builder.setNegativeButton("取消",null);
+                    builder.setNegativeButton("取消", null);
                     builder.show();
                 }
             }
 
             @Override
-            public void onFail()
-            {
-                Toast.makeText(mFluxActivity.getContext(),"检查更新失败",Toast.LENGTH_SHORT).show();
+            public void onFail() {
+                Toast.makeText(mFluxActivity.getContext(), "检查更新失败", Toast.LENGTH_SHORT).show();
             }
         });
     }
 
-    public void startRefreshFlux()
-    {
+    public void startRefreshFlux() {
         mFluxActivity.setFluxProgressStatus(true);
-        service.getFluxInfo(ReferUtil.getFluxInfoRefer(userManager.getUser()),PostBodyUtil.getPhonePostBody(userManager.getUser()))
+        service.getFluxInfo(ReferUtil.getFluxInfoRefer(userManager.getUser()), PostBodyUtil.getPhonePostBody(userManager.getUser()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnTerminate(new Action0()
-                {
+                .doOnTerminate(new Action0() {
                     @Override
-                    public void call()
-                    {
+                    public void call() {
                         mFluxActivity.setFluxProgressStatus(false);
                     }
                 })
-                .subscribe(new Subscriber<FluxEntity>()
-                {
+                .subscribe(new Subscriber<FluxEntity>() {
                     @Override
-                    public void onCompleted()
-                    {
+                    public void onCompleted() {
 
                     }
 
                     @Override
-                    public void onError(Throwable e)
-                    {
+                    public void onError(Throwable e) {
                         e.printStackTrace();
                         mFluxActivity.showToast("加载失败");
                     }
 
                     @Override
-                    public void onNext(FluxEntity fluxEntity)
-                    {
-                        if (fluxEntity.isSuccess())
-                        {
+                    public void onNext(FluxEntity fluxEntity) {
+                        if (fluxEntity.isSuccess()) {
                             int ava = fluxEntity.getData().getSum().getAvailable();
                             int total = fluxEntity.getData().getSum().getTotal();
                             String msg = "流量:总共" + total + "M 可用" + ava + "M";
@@ -138,165 +119,129 @@ public class FluxPresenter extends BasePresenter
                             userManager.getUser().setAvailableFlux(ava);
                             userManager.getUser().setTotalFlux(total);
                             userManager.saveUser();
-                        }
-                        else
-                        {
+                        } else {
                             mFluxActivity.showToast(fluxEntity.getMsg());
                         }
                     }
                 });
     }
 
-    public void startRefreshWelfareInfo()
-    {
+    public void startRefreshWelfareInfo() {
         mFluxActivity.setWelfareProgressStatus(true);
-        if (userManager.getUser().getCookie() == null)
-        {
-
+        if (userManager.getUser().getCookie() == null) {
             service.getWelfareCookie(userManager.getUser().getPhone(), userManager.getUser().getSessionID())
-                    .enqueue(new Callback<ResponseBody>()
-                    {
+                    .enqueue(new Callback<ResponseBody>() {
                         @Override
-                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response)
-                        {
-                            String cookie=response.headers().get("Set-Cookie");
-                            cookie= CookieUtil.decodeCookie(cookie);
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                            String cookie = response.headers().get("Set-Cookie");
+                            cookie = CookieUtil.decodeCookie(cookie);
                             userManager.getUser().setCookie(cookie);
                             userManager.saveUser();
-                            service.getWelfareInfo(ReferUtil.getFluxInfoRefer(userManager.getUser()),cookie)
+                            service.getWelfareInfo(ReferUtil.getFluxInfoRefer(userManager.getUser()), cookie)
                                     .subscribeOn(Schedulers.io())
                                     .observeOn(AndroidSchedulers.mainThread())
-                                    .doOnTerminate(new Action0()
-                                    {
+                                    .doOnTerminate(new Action0() {
                                         @Override
-                                        public void call()
-                                        {
+                                        public void call() {
                                             mFluxActivity.setWelfareProgressStatus(false);
                                         }
                                     })
-                                    .subscribe(new Subscriber<WelfareInfoEntity>()
-                                    {
+                                    .subscribe(new Subscriber<WelfareInfoEntity>() {
                                         @Override
-                                        public void onCompleted()
-                                        {
+                                        public void onCompleted() {
                                         }
 
                                         @Override
-                                        public void onError(Throwable e)
-                                        {
+                                        public void onError(Throwable e) {
                                             mFluxActivity.showToast("获取信息失败");
                                         }
 
                                         @Override
-                                        public void onNext(WelfareInfoEntity welfareEnvelopEntity)
-                                        {
+                                        public void onNext(WelfareInfoEntity welfareEnvelopEntity) {
                                             WelfareInfoReceive(welfareEnvelopEntity);
                                         }
                                     });
                         }
 
                         @Override
-                        public void onFailure(Call<ResponseBody> call, Throwable t)
-                        {
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
                             mFluxActivity.showToast("网络错误,获取Cookie失败！");
                             mFluxActivity.setWelfareProgressStatus(false);
                         }
                     });
-        }
-        else
-        {
-            service.getWelfareInfo(ReferUtil.getFluxInfoRefer(userManager.getUser()),userManager.getUser().getCookie())
+        } else {
+            service.getWelfareInfo(ReferUtil.getFluxInfoRefer(userManager.getUser()), userManager.getUser().getCookie())
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
-                    .doOnTerminate(new Action0()
-                    {
+                    .doOnTerminate(new Action0() {
                         @Override
-                        public void call()
-                        {
+                        public void call() {
                             mFluxActivity.setWelfareProgressStatus(false);
                         }
                     })
-                    .subscribe(new Subscriber<WelfareInfoEntity>()
-                    {
+                    .subscribe(new Subscriber<WelfareInfoEntity>() {
                         @Override
-                        public void onCompleted()
-                        {
+                        public void onCompleted() {
                         }
 
                         @Override
-                        public void onError(Throwable e)
-                        {
+                        public void onError(Throwable e) {
                             mFluxActivity.showToast("获取信息失败");
                         }
 
                         @Override
-                        public void onNext(WelfareInfoEntity welfareEnvelopEntity)
-                        {
+                        public void onNext(WelfareInfoEntity welfareEnvelopEntity) {
                             WelfareInfoReceive(welfareEnvelopEntity);
                         }
                     });
         }
     }
 
-    public void startGrabWelfare()
-    {
+    public void startGrabWelfare() {
         Intent i = new Intent();
         i.setClass(mFluxActivity.getContext().getApplicationContext(), WelfareService.class);
         i.putExtra("mode", WelfareService.START_GRAB);
         mFluxActivity.getContext().getApplicationContext().startService(i);
     }
 
-    public void startLogin()
-    {
-        if (!userManager.canLogin())
-        {
+    public void startLogin() {
+        if (!userManager.canLogin()) {
             return;
         }
         userManager.refreshUser();
-        if (!userManager.getUser().isLogin())
-        {
-            if (userManager.getUser().getSessionID() != null)
-            {
+        if (!userManager.getUser().isLogin()) {
+            if (userManager.getUser().getSessionID() != null) {
                 mFluxActivity.setLoginStatus(LOGINING);
                 service.loginWithSessionID(PostBodyUtil.getLoginPostBodyWithSessionID(userManager.getUser()))
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Subscriber<LoginEntity>()
-                        {
+                        .subscribe(new Subscriber<LoginEntity>() {
                             @Override
-                            public void onCompleted()
-                            {
+                            public void onCompleted() {
 
                             }
 
                             @Override
-                            public void onError(Throwable e)
-                            {
+                            public void onError(Throwable e) {
                                 mFluxActivity.setLoginStatus(LOGIN_FAIL);
                                 mFluxActivity.showToast("请检查网络连接");
                             }
 
                             @Override
-                            public void onNext(LoginEntity loginEntity)
-                            {
+                            public void onNext(LoginEntity loginEntity) {
                                 LoginReceive(loginEntity);
                             }
                         });
-                if (userManager.getUser().getTotalFlux() != -1)
-                {
+                if (userManager.getUser().getTotalFlux() != -1) {
                     int ava = userManager.getUser().getAvailableFlux();
                     int total = userManager.getUser().getTotalFlux();
                     String msg = "流量:总共" + total + "M 可用" + ava + "M";
                     mFluxActivity.setFlux(msg, (float) (total - ava) * 100 / total);
                 }
-            }
-            else
-            {
+            } else {
                 mFluxActivity.showToast("未登录");
             }
-        }
-        else
-        {
+        } else {
             mFluxActivity.showToast("登录成功");
             mFluxActivity.setPhoneNum(userManager.getUser().getPhone());
             mFluxActivity.setLoginStatus(LOGIN_SUCCESS);
@@ -305,16 +250,13 @@ public class FluxPresenter extends BasePresenter
 
     }
 
-    public void startGrabWelfareAtTime()
-    {
+    public void startGrabWelfareAtTime() {
         DatePickerFragment f = new DatePickerFragment();
         f.show(((FluxActivity) mFluxActivity).getSupportFragmentManager(), DatePickerFragment.TAG);
     }
 
-    public void stopWelfareService()
-    {
-        if (isWelfareServiceRunning())
-        {
+    public void stopWelfareService() {
+        if (isWelfareServiceRunning()) {
             Intent i = new Intent();
             i.setClass(mFluxActivity.getContext().getApplicationContext(), WelfareService.class);
             i.putExtra("mode", WelfareService.STOP_SERVICE);
@@ -323,26 +265,21 @@ public class FluxPresenter extends BasePresenter
     }
 
     @Subscribe
-    public void LoginReceive(LoginEntity entity)
-    {
+    public void LoginReceive(LoginEntity entity) {
         mFluxActivity.setLoginStatus(entity.isSuccess() ? LOGIN_SUCCESS : LOGIN_FAIL);
         userManager.getUser().setIsLogin(entity.isSuccess());
-        if (entity.isSuccess())
-        {
+        if (entity.isSuccess()) {
             mFluxActivity.showToast(entity.isSuccess() ? "登录成功" : "登录失败");
             mFluxActivity.setPhoneNum(userManager.getUser().getPhone());
             userManager.getUser().setToken(entity.getToken());
             userManager.getUser().setSessionID(entity.getSessionID());
             userManager.saveUser();
-        }
-        else
-        {
+        } else {
             mFluxActivity.showToast(entity.getMsg());
         }
     }
 
-    public void WelfareInfoReceive(WelfareInfoEntity entity)
-    {
+    public void WelfareInfoReceive(WelfareInfoEntity entity) {
         mFluxActivity.showToast("刷新成功");
         int total = entity.getData().getRule().getTotalNum();
         int remain = entity.getData().getRemain();
@@ -354,20 +291,16 @@ public class FluxPresenter extends BasePresenter
 
     @SuppressWarnings("unused")
     @Subscribe
-    public void onWelfareServiceEventReceive(WelfareServiceEvent event)
-    {
+    public void onWelfareServiceEventReceive(WelfareServiceEvent event) {
         mFluxActivity.setWelfareServiceStatus(event.getMsg(), event.isGrabing());
     }
 
-    private boolean isWelfareServiceRunning()
-    {
+    private boolean isWelfareServiceRunning() {
         boolean isRunning = false;
         ActivityManager am = (ActivityManager) mFluxActivity.getContext().getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
         List<ActivityManager.RunningServiceInfo> list = am.getRunningServices(Integer.MAX_VALUE);
-        for (int i = 0; i < list.size(); i++)
-        {
-            if (WelfareService.class.getName().equals(list.get(i).service.getClassName()))
-            {
+        for (int i = 0; i < list.size(); i++) {
+            if (WelfareService.class.getName().equals(list.get(i).service.getClassName())) {
                 isRunning = true;
                 break;
             }
@@ -375,8 +308,7 @@ public class FluxPresenter extends BasePresenter
         return isRunning;
     }
 
-    public void onDestroy()
-    {
+    public void onDestroy() {
         mHandler.removeCallbacksAndMessages(null);
         BusProvide.getBus().unregister(this);
         stopWelfareService();

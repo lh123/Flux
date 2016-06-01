@@ -25,8 +25,7 @@ import rx.Observable;
  * Created by liuhui on 2016/5/12.
  * FluxApiService
  */
-public interface FluxApiService
-{
+public interface FluxApiService {
     @GET("getCaptcha/{phone}")
     Observable<CapEntity> getCap(@Path("phone") String phone);
 
@@ -45,24 +44,24 @@ public interface FluxApiService
 
     @GET("redEnvelopes/envelopesInfo")
     @Headers("Content-type: application/json; charset=utf-8")
-    Observable<WelfareInfoEntity> getWelfareInfo(@Header("Referer")String refer,
-                                                 @Header("Cookie")String cookie);
+    Observable<WelfareInfoEntity> getWelfareInfo(@Header("Referer") String refer,
+                                                 @Header("Cookie") String cookie);
 
     @GET("welfare_android")
     @Headers({"Accept-Encoding: gzip,deflate",
             "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
             "User-Agent: Mozilla/5.0 (Linux; Android 5.0.2; MI 2 Build/LRX22G) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/37.0.0.0 Mobile Safari/537.36",
             "X-Requested-With: com.hoyotech.lucky_draw"})
-    Call<ResponseBody> getWelfareCookie(@Query("phone")String phone,
-                                        @Query("sessionId")String sessionId);
+    Call<ResponseBody> getWelfareCookie(@Query("phone") String phone,
+                                        @Query("sessionId") String sessionId);
 
     @GET("redEnvelopes/grabEnvelopes")
-    Observable<GrabInfoEntity> grabWelfare(@Header("Referer")String refer,
-                                           @Header("Cookie")String cookie);
+    Observable<GrabInfoEntity> grabWelfare(@Header("Referer") String refer,
+                                           @Header("Cookie") String cookie);
 
     @POST("redEnvelopes/grabEnvelopesRecord")
     @Headers({"Content-Type: application/json;charset=UTF-8"})
-    Observable<WelfareRecordEntity> getWelfareRecord(@Header("Referer")String refer,
-                                                     @Header("Cookie")String cookie,
+    Observable<WelfareRecordEntity> getWelfareRecord(@Header("Referer") String refer,
+                                                     @Header("Cookie") String cookie,
                                                      @Body PhonePostBody body);
 }

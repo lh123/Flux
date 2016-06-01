@@ -7,29 +7,21 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 
-public class StreamUtil
-{
-    public static String readFromStream(InputStream in)
-    {
+public class StreamUtil {
+    public static String readFromStream(InputStream in) {
         InputStreamReader isr = new InputStreamReader(in);
         BufferedReader br = new BufferedReader(isr);
         StringBuilder sb = new StringBuilder();
         String temp = null;
-        try
-        {
-            while ((temp = br.readLine()) != null)
-            {
+        try {
+            while ((temp = br.readLine()) != null) {
                 sb.append(temp);
             }
             temp = sb.toString();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             temp = null;
             e.printStackTrace();
-        }
-        finally
-        {
+        } finally {
             closeStream(br);
             closeStream(isr);
             closeStream(in);
@@ -37,33 +29,22 @@ public class StreamUtil
         return temp;
     }
 
-    public static void writeToStream(OutputStream ou, byte[] b)
-    {
-        try
-        {
+    public static void writeToStream(OutputStream ou, byte[] b) {
+        try {
             ou.write(b);
             ou.flush();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             e.printStackTrace();
-        }
-        finally
-        {
+        } finally {
             closeStream(ou);
         }
     }
 
-    private static void closeStream(Closeable c)
-    {
-        if (c != null)
-        {
-            try
-            {
+    private static void closeStream(Closeable c) {
+        if (c != null) {
+            try {
                 c.close();
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

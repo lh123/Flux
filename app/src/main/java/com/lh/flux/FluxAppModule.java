@@ -19,47 +19,40 @@ import dagger.Provides;
  * FluxAppModule
  */
 @Module
-public class FluxAppModule
-{
+public class FluxAppModule {
     private Application application;
 
-    public FluxAppModule(Application application)
-    {
+    public FluxAppModule(Application application) {
         this.application = application;
     }
 
     @Singleton
     @Provides
-    public User provideUser(FluxUserManager userManager)
-    {
+    public User provideUser(FluxUserManager userManager) {
         return userManager.getUser();
     }
 
     @Singleton
     @Provides
-    public FluxUserManager provideUserManager()
-    {
+    public FluxUserManager provideUserManager() {
         return new FluxUserManager(application);
     }
 
     @Singleton
     @Provides
-    Context provideContext()
-    {
+    Context provideContext() {
         return application;
     }
 
     @Singleton
     @Provides
-    RefWatcher provideRefWatcher()
-    {
+    RefWatcher provideRefWatcher() {
         return LeakCanary.install(application);
     }
 
     @Singleton
     @Provides
-    UpdateManager provideUpdateManager()
-    {
+    UpdateManager provideUpdateManager() {
         return new UpdateManager(application);
     }
 }

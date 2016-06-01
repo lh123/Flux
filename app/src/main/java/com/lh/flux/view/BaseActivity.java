@@ -11,18 +11,16 @@ import com.lh.flux.FluxAppComponent;
  * Created by liuhui on 2016/5/12.
  * BaseActivity
  */
-public abstract class BaseActivity extends AppCompatActivity
-{
+public abstract class BaseActivity extends AppCompatActivity {
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState)
-    {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setUpComponent();
     }
 
     protected abstract void setUpComponent();
-    protected FluxAppComponent getAppComponent()
-    {
+
+    protected FluxAppComponent getAppComponent() {
         return FluxApp.getApp().getAppComponent();
     }
 }

@@ -7,30 +7,25 @@ import android.content.Intent;
 
 import com.umeng.analytics.MobclickAgent;
 
-public class MyCrashHandler implements Thread.UncaughtExceptionHandler
-{
+public class MyCrashHandler implements Thread.UncaughtExceptionHandler {
     private static final MyCrashHandler handler = new MyCrashHandler();
 
     private Context mContext;
 
-    private MyCrashHandler()
-    {
+    private MyCrashHandler() {
     }
 
-    public static MyCrashHandler getInstance()
-    {
+    public static MyCrashHandler getInstance() {
         return handler;
     }
 
-    public void init(Context context)
-    {
+    public void init(Context context) {
 //        Thread.UncaughtExceptionHandler mDefaultHandler = Thread.getDefaultUncaughtExceptionHandler();
         mContext = context;
     }
 
     @Override
-    public void uncaughtException(Thread p1, Throwable p2)
-    {
+    public void uncaughtException(Thread p1, Throwable p2) {
         p2.printStackTrace();
         MobclickAgent.reportError(mContext.getApplicationContext(), p2);
         Intent i = new Intent();

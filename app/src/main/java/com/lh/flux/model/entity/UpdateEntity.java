@@ -7,9 +7,8 @@ import com.google.gson.annotations.SerializedName;
  * updateEntity
  */
 @SuppressWarnings("unused")
-public class UpdateEntity
-{
-//    {
+public class UpdateEntity {
+    //    {
 //        "apkFile": {
 //        "__type": "File",
 //                "cdn": "upyun",
@@ -27,81 +26,66 @@ public class UpdateEntity
     private int visionCode;
     private ApkFile apkFile;
 
-    public String getAppName()
-    {
+    public String getAppName() {
         return appName;
     }
 
-    public void setAppName(String appName)
-    {
+    public void setAppName(String appName) {
         this.appName = appName;
     }
 
-    public int getVisionCode()
-    {
+    public int getVisionCode() {
         return visionCode;
     }
 
-    public void setVisionCode(int visionCode)
-    {
+    public void setVisionCode(int visionCode) {
         this.visionCode = visionCode;
     }
 
-    public ApkFile getApkFile()
-    {
+    public ApkFile getApkFile() {
         return apkFile;
     }
 
-    public void setApkFile(ApkFile apkFile)
-    {
+    public void setApkFile(ApkFile apkFile) {
         this.apkFile = apkFile;
     }
 
-    public static class ApkFile
-    {
+    public static class ApkFile {
         @SerializedName("__type")
         private String type;
         private String cdn;
         private String filename;
         private String url;
 
-        public String getUrl()
-        {
+        public String getUrl() {
             return url;
         }
 
-        public void setUrl(String url)
-        {
+        public void setUrl(String url) {
             this.url = url;
         }
 
-        public String getType()
-        {
+        public String getType() {
             return type;
         }
 
-        public void setType(String type)
-        {
+        public void setType(String type) {
             this.type = type;
         }
 
-        public String getCdn()
-        {
+        public String getCdn() {
             return cdn;
         }
 
-        public void setCdn(String cdn)
-        {
+        public void setCdn(String cdn) {
             this.cdn = cdn;
         }
 
-        public String getFilename()
-        {
+        public String getFilename() {
             return filename;
         }
 
-        public void setFilename(String filename)
-        {
+        public void setFilename(String filename) {
             this.filename = filename;
         }
     }

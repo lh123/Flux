@@ -9,41 +9,32 @@ import android.telephony.TelephonyManager;
 
 import com.lh.flux.model.entity.User;
 
-import dagger.Module;
-
 /**
  * Created by liuhui on 2016/5/12.
  * FluxUserManager用户管理类
  */
-public class FluxUserManager
-{
+public class FluxUserManager {
     private User user;
     private SharedPreferences mPreference;
     private Context mContext;
 
-    public FluxUserManager(Context context)
-    {
+    public FluxUserManager(Context context) {
         user = new User();
-        this.mContext=context;
+        this.mContext = context;
         mPreference = context.getSharedPreferences("user", Context.MODE_PRIVATE);
     }
 
-    public boolean canLogin()
-    {
+    public boolean canLogin() {
         return ContextCompat.checkSelfPermission(mContext, Manifest.permission.READ_PHONE_STATE)
                 == PackageManager.PERMISSION_GRANTED
                 || (mPreference.contains("imei") && mPreference.contains("imsi"));
     }
 
-    public void refreshUser()
-    {
-        if (mPreference.contains("imei") && mPreference.contains("imsi"))
-        {
+    public void refreshUser() {
+        if (mPreference.contains("imei") && mPreference.contains("imsi")) {
             user.setImei(mPreference.getString("imei", null));
             user.setImsi(mPreference.getString("imsi", null));
-        }
-        else
-        {
+        } else {
             TelephonyManager tm = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
             user.setImei(tm.getDeviceId());
             user.setImsi(tm.getSubscriberId());
@@ -55,8 +46,7 @@ public class FluxUserManager
         user.setTotalFlux(mPreference.getInt("totalFlux", 0));
     }
 
-    public void saveUser()
-    {
+    public void saveUser() {
         SharedPreferences.Editor edit = mPreference.edit();
         edit.putString("imei", user.getImei());
         edit.putString("imsi", user.getImsi());
@@ -68,8 +58,7 @@ public class FluxUserManager
         edit.apply();
     }
 
-    public User getUser()
-    {
+    public User getUser() {
         return user;
     }
 }

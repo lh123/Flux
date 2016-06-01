@@ -17,12 +17,10 @@ import retrofit2.converter.gson.GsonConverterFactory;
  * FluxApiModule
  */
 @Module
-public class FluxApiModule
-{
+public class FluxApiModule {
     @Singleton
     @Provides
-    public Retrofit provideRetrofit(OkHttpClient client)
-    {
+    public Retrofit provideRetrofit(OkHttpClient client) {
         return new Retrofit.Builder().baseUrl("http://game.hb189.mobi/")
                 .client(client)
                 .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
@@ -32,21 +30,19 @@ public class FluxApiModule
 
     @Singleton
     @Provides
-    public OkHttpClient provideOkHttpClient()
-    {
+    public OkHttpClient provideOkHttpClient() {
         HttpLoggingInterceptor logi = new HttpLoggingInterceptor();
         logi.setLevel(HttpLoggingInterceptor.Level.BODY);
         return new OkHttpClient.Builder().writeTimeout(3000, TimeUnit.MILLISECONDS)
-                .readTimeout(3000,TimeUnit.MILLISECONDS)
-                .connectTimeout(3000,TimeUnit.MILLISECONDS)
+                .readTimeout(3000, TimeUnit.MILLISECONDS)
+                .connectTimeout(3000, TimeUnit.MILLISECONDS)
                 .addInterceptor(logi)
                 .build();
     }
 
     @Singleton
     @Provides
-    public FluxApiService provideFluxApiService(Retrofit retrofit)
-    {
+    public FluxApiService provideFluxApiService(Retrofit retrofit) {
         return retrofit.create(FluxApiService.class);
     }
 }

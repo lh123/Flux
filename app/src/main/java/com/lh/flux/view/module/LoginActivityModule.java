@@ -13,26 +13,22 @@ import dagger.Provides;
  * LoginActivityModule
  */
 @Module
-public class LoginActivityModule
-{
+public class LoginActivityModule {
     private ILoginActivity loginActivity;
 
-    public LoginActivityModule(ILoginActivity loginActivity)
-    {
+    public LoginActivityModule(ILoginActivity loginActivity) {
         this.loginActivity = loginActivity;
     }
 
     @ActivityScope
     @Provides
-    public ILoginActivity provideLoginActivity()
-    {
+    public ILoginActivity provideLoginActivity() {
         return loginActivity;
     }
 
     @ActivityScope
     @Provides
-    public LoginPresenter provideLoginPresenter(FluxApiService service)
-    {
+    public LoginPresenter provideLoginPresenter(FluxApiService service) {
         return new LoginPresenter(loginActivity, service);
     }
 }

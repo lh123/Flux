@@ -3,116 +3,94 @@ package com.lh.flux.model.entity;
 import java.util.ArrayList;
 
 @SuppressWarnings("unused")
-public class FluxEntity
-{
+public class FluxEntity {
     private String returnCode;
     private Data data;
     private String msg;
 
-    public void setReturnCode(String returnCode)
-    {
-        this.returnCode = returnCode;
-    }
-
-    public String getReturnCode()
-    {
+    public String getReturnCode() {
         return returnCode;
     }
 
-    public void setData(Data data)
-    {
-        this.data = data;
+    public void setReturnCode(String returnCode) {
+        this.returnCode = returnCode;
     }
 
-    public Data getData()
-    {
+    public Data getData() {
         return data;
     }
 
-    public void setMsg(String msg)
-    {
-        this.msg = msg;
+    public void setData(Data data) {
+        this.data = data;
     }
 
-    public String getMsg()
-    {
+    public String getMsg() {
         return msg;
     }
 
-    public boolean isSuccess()
-    {
+    public void setMsg(String msg) {
+        this.msg = msg;
+    }
+
+    public boolean isSuccess() {
         return "000".equals(returnCode);
     }
 
     @SuppressWarnings("unused")
-    public static class Data
-    {
+    public static class Data {
         private Sum sum;
         private String updatedTime;
         private ArrayList<Packages> packages;
 
-        public void setSum(Sum sum)
-        {
-            this.sum = sum;
-        }
-
-        public Sum getSum()
-        {
+        public Sum getSum() {
             return sum;
         }
 
-        public void setUpdatedTime(String updatedTime)
-        {
-            this.updatedTime = updatedTime;
+        public void setSum(Sum sum) {
+            this.sum = sum;
         }
 
-        public String getUpdatedTime()
-        {
+        public String getUpdatedTime() {
             return updatedTime;
         }
 
-        public void setPackages(ArrayList<Packages> packages)
-        {
-            this.packages = packages;
+        public void setUpdatedTime(String updatedTime) {
+            this.updatedTime = updatedTime;
         }
 
-        public ArrayList<Packages> getPackages()
-        {
+        public ArrayList<Packages> getPackages() {
             return packages;
+        }
+
+        public void setPackages(ArrayList<Packages> packages) {
+            this.packages = packages;
         }
     }
 
     @SuppressWarnings("unused")
-    public static class Sum
-    {
+    public static class Sum {
         private int available;
         private int total;
 
-
-        public void setAvailable(int available)
-        {
-            this.available = available;
-        }
-
-        public int getAvailable()
-        {
+        public int getAvailable() {
             return available;
         }
 
-        public void setTotal(int total)
-        {
-            this.total = total;
+        public void setAvailable(int available) {
+            this.available = available;
         }
 
-        public int getTotal()
-        {
+        public int getTotal() {
             return total;
+        }
+
+        public void setTotal(int total) {
+            this.total = total;
         }
     }
 
     @SuppressWarnings("unused")
-    public static class Packages
-    {
+    public static class Packages {
         private String name;
         private int available;
         private int total;
@@ -120,64 +98,52 @@ public class FluxEntity
         private int unitTypeId;
         private String unitType;
 
-        public void setName(String name)
-        {
-            this.name = name;
-        }
-
-        public String getName()
-        {
+        public String getName() {
             return name;
         }
 
-        public void setAvailable(int available)
-        {
-            this.available = available;
+        public void setName(String name) {
+            this.name = name;
         }
 
-        public int getAvailable()
-        {
+        public int getAvailable() {
             return available;
         }
 
-        public void setTotal(int total)
-        {
-            this.total = total;
+        public void setAvailable(int available) {
+            this.available = available;
         }
 
-        public int getTotal()
-        {
+        public int getTotal() {
             return total;
         }
 
-        public void setTrans(int trans)
-        {
-            this.trans = trans;
+        public void setTotal(int total) {
+            this.total = total;
         }
 
-        public int getTrans()
-        {
+        public int getTrans() {
             return trans;
         }
 
-        public void setUnitTypeId(int unitTypeId)
-        {
-            this.unitTypeId = unitTypeId;
+        public void setTrans(int trans) {
+            this.trans = trans;
         }
 
-        public int getUnitTypeId()
-        {
+        public int getUnitTypeId() {
             return unitTypeId;
         }
 
-        public void setUnitType(String unitType)
-        {
-            this.unitType = unitType;
+        public void setUnitTypeId(int unitTypeId) {
+            this.unitTypeId = unitTypeId;
         }
 
-        public String getUnitType()
-        {
+        public String getUnitType() {
             return unitType;
+        }
+
+        public void setUnitType(String unitType) {
+            this.unitType = unitType;
         }
     }
 }

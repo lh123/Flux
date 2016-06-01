@@ -5,117 +5,96 @@ package com.lh.flux.model.entity;
  * LoginPostBodyWithSessionID
  */
 @SuppressWarnings("unused")
-public class LoginPostBodyWithSessionID
-{
+public class LoginPostBodyWithSessionID {
     //"{\"SDK\":" + u.getSdk() + ",\"channel\":\"default\",\"data\":{},\"imsi\":\"" + u.getImsi() + "\",\"isPreInstalled\":false,\"manufacturer\":\"" + u.getManufacturer() + "\",\"mode\":\"" + u.getMode() + "\",\"sessionId\":\"" + u.getSessionID() + "\",\"token\":\"" + u.getToken() + "\",\"userPhone\":\"" + u.getPhone() + "\"}";
     private int SDK;
-    private String channel="default";
+    private String channel = "default";
     private Object data;
     private String imsi;
-    private boolean isPreInstalled=false;
+    private boolean isPreInstalled = false;
     private String manufacturer;
     private String mode;
     private String sessionId;
     private String token;
     private String userPhone;
 
-    public int getSDK()
-    {
+    public int getSDK() {
         return SDK;
     }
 
-    public void setSDK(int SDK)
-    {
+    public void setSDK(int SDK) {
         this.SDK = SDK;
     }
 
-    public String getChannel()
-    {
+    public String getChannel() {
         return channel;
     }
 
-    public void setChannel(String channel)
-    {
+    public void setChannel(String channel) {
         this.channel = channel;
     }
 
-    public Object getData()
-    {
+    public Object getData() {
         return data;
     }
 
-    public void setData(Object data)
-    {
+    public void setData(Object data) {
         this.data = data;
     }
 
-    public String getImsi()
-    {
+    public String getImsi() {
         return imsi;
     }
 
-    public void setImsi(String imsi)
-    {
+    public void setImsi(String imsi) {
         this.imsi = imsi;
     }
 
-    public boolean isPreInstalled()
-    {
+    public boolean isPreInstalled() {
         return isPreInstalled;
     }
 
-    public void setPreInstalled(boolean preInstalled)
-    {
+    public void setPreInstalled(boolean preInstalled) {
         isPreInstalled = preInstalled;
     }
 
-    public String getManufacturer()
-    {
+    public String getManufacturer() {
         return manufacturer;
     }
 
-    public void setManufacturer(String manufacturer)
-    {
+    public void setManufacturer(String manufacturer) {
         this.manufacturer = manufacturer;
     }
 
-    public String getMode()
-    {
+    public String getMode() {
         return mode;
     }
 
-    public void setMode(String mode)
-    {
+    public void setMode(String mode) {
         this.mode = mode;
     }
 
-    public String getSessionId()
-    {
+    public String getSessionId() {
         return sessionId;
     }
 
-    public void setSessionId(String sessionId)
-    {
+    public void setSessionId(String sessionId) {
         this.sessionId = sessionId;
     }
 
-    public String getToken()
-    {
+    public String getToken() {
         return token;
     }
 
-    public void setToken(String token)
-    {
+    public void setToken(String token) {
         this.token = token;
     }
 
-    public String getUserPhone()
-    {
+    public String getUserPhone() {
         return userPhone;
     }
 
-    public void setUserPhone(String userPhone)
-    {
+    public void setUserPhone(String userPhone) {
         this.userPhone = userPhone;
     }
 }

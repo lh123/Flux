@@ -1,7 +1,5 @@
 package com.lh.flux.view.component;
 
-import android.app.Activity;
-
 import com.lh.flux.ActivityScope;
 import com.lh.flux.FluxAppComponent;
 import com.lh.flux.view.LoginActivity;
@@ -14,8 +12,7 @@ import dagger.Component;
  * LoginActivityComponent
  */
 @ActivityScope
-@Component(modules = LoginActivityModule.class,dependencies = FluxAppComponent.class)
-public interface LoginActivityComponent
-{
+@Component(modules = LoginActivityModule.class, dependencies = FluxAppComponent.class)
+public interface LoginActivityComponent {
     void inject(LoginActivity activity);
 }

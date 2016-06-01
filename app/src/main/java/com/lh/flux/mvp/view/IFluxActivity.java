@@ -4,8 +4,7 @@ import android.content.Context;
 
 import com.lh.flux.domain.UpdateManager;
 
-public interface IFluxActivity
-{
+public interface IFluxActivity {
 
     void showToast(String msg);
 

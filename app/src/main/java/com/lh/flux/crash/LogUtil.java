@@ -13,22 +13,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class LogUtil
-{
+public class LogUtil {
+    private static LogUtil logUtil;
     private SimpleDateFormat formate;
     private FileWriter write;
-    private static LogUtil logUtil;
-
     private boolean isInit = false;
 
-    public static LogUtil getInstance()
-    {
-        if (logUtil == null)
-        {
-            synchronized (LogUtil.class)
-            {
-                if (logUtil == null)
-                {
+    public static LogUtil getInstance() {
+        if (logUtil == null) {
+            synchronized (LogUtil.class) {
+                if (logUtil == null) {
                     logUtil = new LogUtil();
                 }
             }
@@ -37,79 +31,44 @@ public class LogUtil
     }
 
 
-    public void init(Context context)
-    {
-        if(ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)== PackageManager.PERMISSION_GRANTED)
-        {
+    public void init(Context context) {
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
             isInit = true;
             Context mContext = context.getApplicationContext();
             File dir = mContext.getExternalFilesDir("log");
             assert dir != null;
             dir = new File(dir.getAbsolutePath());
             formate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-            if (!dir.exists() || !dir.canRead())
-            {
+            if (!dir.exists() || !dir.canRead()) {
                 boolean isCreat = dir.mkdirs();
                 System.out.print(isCreat);
             }
             File file = new File(dir, "log.txt");
             boolean isAppend = true;
-            if (file.length() > 50 * 1024)
-            {
+            if (file.length() > 50 * 1024) {
                 //System.out.println("clear");
                 isAppend = false;
             }
-            try
-            {
+            try {
                 write = new FileWriter(file, isAppend);
                 write.write("----------------\n");
                 write.flush();
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }
     }
 
-//    public void logE(String tag, Exception ex)
-//    {
-//        if(isInit)
-//        {
-//            ex.printStackTrace();
-//            StringWriter sw = new StringWriter();
-//            PrintWriter pw = new PrintWriter(sw);
-//            ex.printStackTrace(pw);
-//            Date date = new Date(System.currentTimeMillis());
-//            String time = formate.format(date);
-//            String temp = time + " " + tag + " :" + sw.toString();
-//            try
-//            {
-//                write.write(temp + "\n");
-//                write.flush();
-//            }
-//            catch (IOException e)
-//            {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
-
-    public void logE(String tag, String msg)
-    {
+    public void logE(String tag, String msg) {
         Log.i(tag, msg == null ? "null" : msg);
-        if (isInit)
-        {
+        if (isInit) {
             Date date = new Date(System.currentTimeMillis());
             String time = formate.format(date);
             String temp = time + " " + tag + " :" + msg;
-            try
-            {
+            try {
                 write.write(temp + "\n");
                 write.flush();
-            }
-            catch (IOException e)
-            {
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

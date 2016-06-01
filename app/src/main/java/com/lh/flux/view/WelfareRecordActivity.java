@@ -2,7 +2,6 @@ package com.lh.flux.view;
 
 import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -26,18 +25,19 @@ import javax.inject.Inject;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-public class WelfareRecordActivity extends BaseActivity implements IWelfareRecordActivity, SwipeRefreshLayout.OnRefreshListener
-{
-    @BindView(R.id.welfare_record_refresh) SwipeRefreshLayout mSwipeRefreshLayout;
-    @BindView(R.id.welfare_record_recycler_view) RecyclerView mRecyclerView;
-    @BindView(R.id.toolbar) Toolbar toolbar;
+public class WelfareRecordActivity extends BaseActivity implements IWelfareRecordActivity, SwipeRefreshLayout.OnRefreshListener {
+    @BindView(R.id.welfare_record_refresh)
+    SwipeRefreshLayout mSwipeRefreshLayout;
+    @BindView(R.id.welfare_record_recycler_view)
+    RecyclerView mRecyclerView;
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
+    @Inject
+    WelfareRecordPresenter mPresenter;
     private WelfareRecyclerAdapter mAdapter;
 
-    @Inject WelfareRecordPresenter mPresenter;
-
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         ThemeUtil.getInstance().setTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.welfare_record_aty);
@@ -57,8 +57,7 @@ public class WelfareRecordActivity extends BaseActivity implements IWelfareRecor
     }
 
     @Override
-    protected void setUpComponent()
-    {
+    protected void setUpComponent() {
         DaggerWelfareRecordActivityComponent.builder()
                 .welfareRecordActivityModule(new WelfareRecordActivityModule(this))
                 .fluxAppComponent(getAppComponent())
@@ -67,57 +66,47 @@ public class WelfareRecordActivity extends BaseActivity implements IWelfareRecor
     }
 
     @Override
-    public void onRefresh()
-    {
+    public void onRefresh() {
         mPresenter.startRefreshWelfareRecord();
     }
 
     @Override
-    public void setData(ArrayList<WelfareRecordEntity.Data> data)
-    {
+    public void setData(ArrayList<WelfareRecordEntity.Data> data) {
         int preSize = mAdapter.getItemCount();
         mAdapter.setData(data);
-        if (preSize < data.size())
-        {
+        if (preSize < data.size()) {
             mAdapter.notifyItemRangeInserted(preSize, data.size() - preSize);
-        } else if (preSize > data.size())
-        {
+        } else if (preSize > data.size()) {
             mAdapter.notifyItemRangeRemoved(data.size(), preSize - data.size());
-        } else
-        {
+        } else {
             mAdapter.notifyItemRangeChanged(0, data.size());
         }
     }
 
     @Override
-    public void setRefreshStatus(boolean status)
-    {
+    public void setRefreshStatus(boolean status) {
         mSwipeRefreshLayout.setRefreshing(status);
     }
 
     @Override
-    public void showToast(String msg)
-    {
+    public void showToast(String msg) {
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
     }
 
     @Override
-    protected void onResume()
-    {
+    protected void onResume() {
         super.onResume();
         MobclickAgent.onResume(this);
     }
 
     @Override
-    protected void onPause()
-    {
+    protected void onPause() {
         super.onPause();
         MobclickAgent.onPause(this);
     }
 
     @Override
-    protected void onDestroy()
-    {
+    protected void onDestroy() {
         mPresenter.onDestroy();
         super.onDestroy();
     }

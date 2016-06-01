@@ -2,18 +2,13 @@ package com.lh.flux.domain;
 
 import com.squareup.otto.Bus;
 
-public class BusProvide
-{
+public class BusProvide {
     private static Bus mBus;
 
-    public static Bus getBus()
-    {
-        if (mBus == null)
-        {
-            synchronized (BusProvide.class)
-            {
-                if (mBus == null)
-                {
+    public static Bus getBus() {
+        if (mBus == null) {
+            synchronized (BusProvide.class) {
+                if (mBus == null) {
                     mBus = new Bus();
                 }
             }

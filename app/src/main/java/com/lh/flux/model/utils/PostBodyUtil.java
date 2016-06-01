@@ -9,16 +9,13 @@ import com.lh.flux.model.entity.User;
  * Created by liuhui on 2016/5/12.
  * PostBodyUtil
  */
-public class PostBodyUtil
-{
-    public static PhonePostBody getPhonePostBody(User user)
-    {
+public class PostBodyUtil {
+    public static PhonePostBody getPhonePostBody(User user) {
         return new PhonePostBody(user.getPhone());
     }
 
-    public static LoginPostBodyWithCap getLoginPostBodyWithCap(User user,String captcha)
-    {
-        LoginPostBodyWithCap bodyWithCap=new LoginPostBodyWithCap();
+    public static LoginPostBodyWithCap getLoginPostBodyWithCap(User user, String captcha) {
+        LoginPostBodyWithCap bodyWithCap = new LoginPostBodyWithCap();
         bodyWithCap.setSDK(user.getSdk());
         bodyWithCap.setCaptcha(captcha);
         bodyWithCap.setData(new Object());
@@ -30,9 +27,8 @@ public class PostBodyUtil
         return bodyWithCap;
     }
 
-    public static LoginPostBodyWithSessionID getLoginPostBodyWithSessionID(User user)
-    {
-        LoginPostBodyWithSessionID bodyWithSessionID=new LoginPostBodyWithSessionID();
+    public static LoginPostBodyWithSessionID getLoginPostBodyWithSessionID(User user) {
+        LoginPostBodyWithSessionID bodyWithSessionID = new LoginPostBodyWithSessionID();
         bodyWithSessionID.setSDK(user.getSdk());
         bodyWithSessionID.setData(new Object());
         bodyWithSessionID.setImsi(user.getImsi());

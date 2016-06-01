@@ -24,33 +24,28 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Locale;
 
-public class DatePickerFragment extends DialogFragment
-{
+public class DatePickerFragment extends DialogFragment {
     public static final String TAG = "DatePickerFragment";
 
     //private DatePickerDialog mDialog;
     @NonNull
     @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState)
-    {
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
         final SharedPreferences sp = getActivity().getSharedPreferences("auto_grab", Context.MODE_PRIVATE);
         final long advanceTime = Long.parseLong(PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).getString("advance_time", "3")) * 60 * 1000;
         final Calendar ca = Calendar.getInstance();
         ca.setTimeInMillis(System.currentTimeMillis());
         int theme = ThemeUtil.getInstance().getCurrentTheme() == 0 ? R.style.DialogBlue : R.style.DialogRed;
-        return new TimePickerDialog(getActivity(), theme, new TimePickerDialog.OnTimeSetListener()
-        {
+        return new TimePickerDialog(getActivity(), theme, new TimePickerDialog.OnTimeSetListener() {
 
             @Override
-            public void onTimeSet(TimePicker p1, int p2, int p3)
-            {
+            public void onTimeSet(TimePicker p1, int p2, int p3) {
                 AlarmManager am = (AlarmManager) getActivity().getApplicationContext().getSystemService(Context.ALARM_SERVICE);
                 ca.set(Calendar.HOUR_OF_DAY, p2);
                 ca.set(Calendar.MINUTE, p3);
                 ca.set(Calendar.SECOND, 0);
                 ca.set(Calendar.MILLISECOND, 0);
-                if (ca.getTimeInMillis() <= System.currentTimeMillis())
-                {
+                if (ca.getTimeInMillis() <= System.currentTimeMillis()) {
                     ((FluxActivity) getActivity()).showToast("时间设定为明天");
                     ca.add(Calendar.DAY_OF_MONTH, 1);
                 }
@@ -60,16 +55,11 @@ public class DatePickerFragment extends DialogFragment
                 si.setClass(getActivity().getApplicationContext(), WelfareService.class);
                 PendingIntent pi = PendingIntent.getService(getActivity().getApplicationContext(), 0, si, PendingIntent.FLAG_UPDATE_CURRENT);
                 am.cancel(pi);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
-                {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                     am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, ca.getTimeInMillis() - advanceTime, pi);
-                }
-                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
-                {
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     am.setExact(AlarmManager.RTC_WAKEUP, ca.getTimeInMillis() - advanceTime, pi);
-                }
-                else
-                {
+                } else {
                     am.set(AlarmManager.RTC_WAKEUP, ca.getTimeInMillis() - advanceTime, pi);
                 }
                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());

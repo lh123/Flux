@@ -1,39 +1,32 @@
 package com.lh.flux.model.entity;
 
-public class GrabInfoEntity
-{
+public class GrabInfoEntity {
     private String returnCode;
     private String msg;
     private WelfareEnvelopEntity data;
 
-    @SuppressWarnings("unused")
-    public void setReturnCode(String returnCode)
-    {
-        this.returnCode = returnCode;
-    }
-
-    public String getReturnCode()
-    {
+    public String getReturnCode() {
         return returnCode;
     }
 
-    public void setMsg(String msg)
-    {
-        this.msg = msg;
+    @SuppressWarnings("unused")
+    public void setReturnCode(String returnCode) {
+        this.returnCode = returnCode;
     }
 
-    public String getMsg()
-    {
+    public String getMsg() {
         return msg;
     }
 
-    public void setData(WelfareEnvelopEntity data)
-    {
-        this.data = data;
+    public void setMsg(String msg) {
+        this.msg = msg;
     }
 
-    public WelfareEnvelopEntity getData()
-    {
+    public WelfareEnvelopEntity getData() {
         return data;
+    }
+
+    public void setData(WelfareEnvelopEntity data) {
+        this.data = data;
     }
 }

@@ -1,7 +1,6 @@
 package com.lh.flux.view.module;
 
 import com.lh.flux.ActivityScope;
-import com.lh.flux.model.api.FluxApiService;
 import com.lh.flux.mvp.presenter.FluxPresenter;
 import com.lh.flux.mvp.view.IFluxActivity;
 
@@ -13,26 +12,22 @@ import dagger.Provides;
  * FluxActivityModule
  */
 @Module
-public class FluxActivityModule
-{
+public class FluxActivityModule {
     private IFluxActivity fluxActivity;
 
-    public FluxActivityModule(IFluxActivity fluxActivity)
-    {
+    public FluxActivityModule(IFluxActivity fluxActivity) {
         this.fluxActivity = fluxActivity;
     }
 
     @ActivityScope
     @Provides
-    public IFluxActivity provideFluxActivity()
-    {
+    public IFluxActivity provideFluxActivity() {
         return fluxActivity;
     }
 
     @ActivityScope
     @Provides
-    public FluxPresenter provideFluxPresenter(IFluxActivity activity)
-    {
+    public FluxPresenter provideFluxPresenter(IFluxActivity activity) {
         return new FluxPresenter(activity);
     }
 }

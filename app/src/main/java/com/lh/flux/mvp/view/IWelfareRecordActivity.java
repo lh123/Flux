@@ -4,8 +4,7 @@ import com.lh.flux.model.entity.WelfareRecordEntity;
 
 import java.util.ArrayList;
 
-public interface IWelfareRecordActivity
-{
+public interface IWelfareRecordActivity {
     void setData(ArrayList<WelfareRecordEntity.Data> data);
 
     void setRefreshStatus(boolean status);

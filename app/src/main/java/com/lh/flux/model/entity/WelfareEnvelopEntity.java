@@ -3,8 +3,7 @@ package com.lh.flux.model.entity;
 import com.google.gson.annotations.SerializedName;
 
 @SuppressWarnings("unused")
-public class WelfareEnvelopEntity
-{
+public class WelfareEnvelopEntity {
     @SerializedName("__v")
     private int v;
     @SerializedName("_id")
@@ -18,103 +17,83 @@ public class WelfareEnvelopEntity
     private String slogan;
     private String type;
 
-    public void setV(int v)
-    {
-        this.v = v;
-    }
-
-    public int getV()
-    {
+    public int getV() {
         return v;
     }
 
-    public void setId(String id)
-    {
-        this.id = id;
+    public void setV(int v) {
+        this.v = v;
     }
 
-    public String getId()
-    {
+    public String getId() {
         return id;
     }
 
-    public void setDescription(String description)
-    {
-        this.description = description;
+    public void setId(String id) {
+        this.id = id;
     }
 
-    public String getDescription()
-    {
+    public String getDescription() {
         return description;
     }
 
-    public void setEnabled(boolean enabled)
-    {
-        this.enabled = enabled;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public boolean isEnabled()
-    {
+    public boolean isEnabled() {
         return enabled;
     }
 
-    public void setItemId(String itemId)
-    {
-        this.itemId = itemId;
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
-    public String getItemId()
-    {
+    public String getItemId() {
         return itemId;
     }
 
-    public void setLogoUrl(String logoUrl)
-    {
-        this.logoUrl = logoUrl;
+    public void setItemId(String itemId) {
+        this.itemId = itemId;
     }
 
-    public String getLogoUrl()
-    {
+    public String getLogoUrl() {
         return logoUrl;
     }
 
-    public void setName(String name)
-    {
-        this.name = name;
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
     }
 
-    public String getName()
-    {
+    public String getName() {
         return name;
     }
 
-    public void setPrizeValue(int prizeValue)
-    {
-        this.prizeValue = prizeValue;
+    public void setName(String name) {
+        this.name = name;
     }
 
-    public int getPrizeValue()
-    {
+    public int getPrizeValue() {
         return prizeValue;
     }
 
-    public void setSlogan(String slogan)
-    {
-        this.slogan = slogan;
+    public void setPrizeValue(int prizeValue) {
+        this.prizeValue = prizeValue;
     }
 
-    public String getSlogan()
-    {
+    public String getSlogan() {
         return slogan;
     }
 
-    public void setType(String type)
-    {
-        this.type = type;
+    public void setSlogan(String slogan) {
+        this.slogan = slogan;
     }
 
-    public String getType()
-    {
+    public String getType() {
         return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 }

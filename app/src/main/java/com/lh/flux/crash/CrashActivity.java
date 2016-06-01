@@ -14,12 +14,11 @@ import com.lh.flux.view.FluxActivity;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-public class CrashActivity extends AppCompatActivity implements View.OnClickListener
-{
+public class CrashActivity extends AppCompatActivity implements View.OnClickListener {
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    protected void onCreate(Bundle savedInstanceState)
-    {
+    protected void onCreate(Bundle savedInstanceState) {
         ThemeUtil.getInstance().setDialogTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.crash_aty);
@@ -37,10 +36,8 @@ public class CrashActivity extends AppCompatActivity implements View.OnClickList
     }
 
     @Override
-    public void onClick(View p1)
-    {
-        switch (p1.getId())
-        {
+    public void onClick(View p1) {
+        switch (p1.getId()) {
             case R.id.btn_close:
                 System.exit(0);
                 break;
