@@ -25,6 +25,7 @@ import butterknife.ButterKnife;
 public class LoginActivity extends BaseActivity implements ILoginActivity {
     public static final int LOGIN_SUCCESS = 1;
     public static final int LOGIN_FAIL = 2;
+    public static final int LOGIN_CANCEL = 3;
     @Inject
     LoginPresenter presenter;
     @BindView(R.id.login_ed_phone)
@@ -87,7 +88,7 @@ public class LoginActivity extends BaseActivity implements ILoginActivity {
     protected void onDestroy() {
         presenter.onDestroy();
         if (!haveResult) {
-            setResult(LOGIN_FAIL);
+            setResult(LOGIN_CANCEL);
         }
         super.onDestroy();
     }
@@ -119,5 +120,4 @@ public class LoginActivity extends BaseActivity implements ILoginActivity {
         i.putExtra("phone", phone);
         setResult(resultCode, i);
     }
-
 }

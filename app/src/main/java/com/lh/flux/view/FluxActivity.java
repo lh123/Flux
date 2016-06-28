@@ -1,10 +1,9 @@
 package com.lh.flux.view;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -15,9 +14,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.lh.flux.R;
-import com.lh.flux.crash.LogUtil;
 import com.lh.flux.domain.UpdateManager;
-import com.lh.flux.domain.utils.PermissionUtil;
+import com.lh.flux.domain.utils.PermissionActivity;
+import com.lh.flux.domain.utils.PermissionChecker;
 import com.lh.flux.domain.utils.ThemeUtil;
 import com.lh.flux.mvp.presenter.FluxPresenter;
 import com.lh.flux.mvp.view.IFluxActivity;
@@ -33,7 +32,13 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 public class FluxActivity extends BaseActivity implements View.OnClickListener, IFluxActivity {
+
     public static final int LOGIN_REQUSET_CODE = 1;
+    static final String[] PERMISSIONS = new String[]{
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+    public static int PERMISSION_REQUEST_CODE = 2;
     @BindView(R.id.btn_login)
     Button btnLogin;
     @BindView(R.id.btn_auto_grab_welfare)
@@ -78,6 +83,7 @@ public class FluxActivity extends BaseActivity implements View.OnClickListener, 
     FluxPresenter mPresenter;
     @Inject
     UpdateManager updateManager;
+
     private long backFirst = -1;
 
     @Override
@@ -96,7 +102,10 @@ public class FluxActivity extends BaseActivity implements View.OnClickListener, 
         btnWelfareRecord.setOnClickListener(this);
         btnAutoGrabWelfare.setOnClickListener(this);
         btnLoginRety.setOnClickListener(this);
-        PermissionUtil.getInstance().requestAllPermission(this);
+        PermissionChecker mChecker = new PermissionChecker(this);
+        if (mChecker.lacksPermissions(PERMISSIONS)) {
+            PermissionActivity.startPermissionActivity(this, PERMISSION_REQUEST_CODE, PERMISSIONS);
+        }
     }
 
     @Override
@@ -258,19 +267,19 @@ public class FluxActivity extends BaseActivity implements View.OnClickListener, 
         mPresenter.onDestroy();
         super.onDestroy();
     }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        boolean result = PermissionUtil.getInstance().onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (!result) {
-//            Toast.makeText(this,"部分权限被拒绝，程序可能无法正常运行",Toast.LENGTH_SHORT).show();
-            new AlertDialog.Builder(this).setTitle("警告").setMessage("部分权限被拒绝，程序可能无法正常运行").setPositiveButton("确定", null).show();
-        } else {
-            LogUtil.getInstance().init(getApplicationContext());
-            mPresenter.startLogin();
-        }
-    }
+//
+//    @Override
+//    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+//        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        boolean result = PermissionUtil.getInstance().onRequestPermissionsResult(requestCode, permissions, grantResults);
+//        if (!result) {
+////            Toast.makeText(this,"部分权限被拒绝，程序可能无法正常运行",Toast.LENGTH_SHORT).show();
+//            new AlertDialog.Builder(this).setTitle("警告").setMessage("部分权限被拒绝，程序可能无法正常运行").setPositiveButton("确定", null).show();
+//        } else {
+//            LogUtil.getInstance().init(getApplicationContext());
+//            mPresenter.startLogin();
+//        }
+//    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -278,8 +287,12 @@ public class FluxActivity extends BaseActivity implements View.OnClickListener, 
             if (resultCode == LoginActivity.LOGIN_SUCCESS) {
                 setPhoneNum(data.getStringExtra("phone"));
                 setLoginStatus(FluxPresenter.LOGIN_SUCCESS);
-            } else {
+            } else if (resultCode == LoginActivity.LOGIN_FAIL) {
                 setLoginStatus(FluxPresenter.LOGIN_FAIL);
+            }
+        } else if (requestCode == PERMISSION_REQUEST_CODE) {
+            if (resultCode == PermissionActivity.PERMISSION_DENIED) {
+                finish();
             }
         }
         super.onActivityResult(requestCode, resultCode, data);

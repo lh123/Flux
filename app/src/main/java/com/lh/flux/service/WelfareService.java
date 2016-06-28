@@ -238,20 +238,22 @@ public class WelfareService extends Service {
         Notification.Builder builder = new Notification.Builder(this);
         builder.setContentTitle("服务运行中");
         builder.setSmallIcon(R.mipmap.ic_launcher);
+        Intent i = new Intent(this, FluxActivity.class);
+        i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        PendingIntent pi = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(pi);
         if (mode == FLAG_SERVICE_RUNNING) {
             builder.setContentText(msg);
+            builder.setAutoCancel(false);
+            builder.setOngoing(true);
             Notification no = builder.build();
-            no.flags = Notification.FLAG_NO_CLEAR | Notification.FLAG_ONGOING_EVENT;
             nm.notify(FLAG_SERVICE_RUNNING, no);
         } else {
             builder.setContentTitle("服务已关闭");
             builder.setContentText(msg);
-            Intent i = new Intent(this, FluxActivity.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-            PendingIntent pi = PendingIntent.getActivity(this, 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
-            builder.setContentIntent(pi);
+            builder.setAutoCancel(true);
+            builder.setOngoing(false);
             Notification no = builder.build();
-            no.flags = Notification.FLAG_AUTO_CANCEL;
             nm.notify(FLAG_WELFARE_RESULT, no);
         }
     }
@@ -363,9 +365,7 @@ public class WelfareService extends Service {
         i.putExtra("act", calendar.getTimeInMillis());
         PendingIntent pendingIntent = PendingIntent.getService(getApplicationContext(), 0, i, PendingIntent.FLAG_UPDATE_CURRENT);
         alarmManager.cancel(pendingIntent);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() - advanceTime, pendingIntent);
-        } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() - advanceTime, pendingIntent);
         } else {
             alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() - advanceTime, pendingIntent);

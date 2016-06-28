@@ -55,9 +55,7 @@ public class DatePickerFragment extends DialogFragment {
                 si.setClass(getActivity().getApplicationContext(), WelfareService.class);
                 PendingIntent pi = PendingIntent.getService(getActivity().getApplicationContext(), 0, si, PendingIntent.FLAG_UPDATE_CURRENT);
                 am.cancel(pi);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, ca.getTimeInMillis() - advanceTime, pi);
-                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
                     am.setExact(AlarmManager.RTC_WAKEUP, ca.getTimeInMillis() - advanceTime, pi);
                 } else {
                     am.set(AlarmManager.RTC_WAKEUP, ca.getTimeInMillis() - advanceTime, pi);

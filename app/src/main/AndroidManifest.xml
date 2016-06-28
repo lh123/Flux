@@ -11,6 +11,7 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS"/>
 
     <application
         android:name=".FluxApp"
@@ -41,6 +42,9 @@
             android:excludeFromRecents="true"
             android:label="程序崩溃了"
             android:theme="@style/DialogBlue"/>
+        <activity
+            android:name=".domain.utils.PermissionActivity"
+            android:theme="@style/PermissionActivityTheme"/>
 
         <service android:name=".service.WelfareService"/>
         <receiver android:name=".receiver.BootCompleteReceiver">

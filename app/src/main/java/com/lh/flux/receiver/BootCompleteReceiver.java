@@ -25,7 +25,7 @@ import java.util.Locale;
  */
 public class BootCompleteReceiver extends BroadcastReceiver {
 
-    public static final int NOTIFYID=100;
+    public static final int NOTIFYID = 100;
 
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -72,18 +72,18 @@ public class BootCompleteReceiver extends BroadcastReceiver {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
         LogUtil.getInstance().logE("BootCompleteReceiver", "auto grab " + df.format(calendar.getTime()));
         String time = df.format(calendar.getTime());
-        timeSp.edit().putString("time",  "自动抢红包:"+time).apply();
-        sendNotify(context,"自动定时:"+time);
+        timeSp.edit().putString("time", "自动抢红包:" + time).apply();
+        sendNotify(context, "自动定时:" + time);
     }
 
-    private void sendNotify(Context context,String msg){
-        NotificationManager notificationManager= (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-        Notification.Builder builder=new Notification.Builder(context);
+    private void sendNotify(Context context, String msg) {
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        Notification.Builder builder = new Notification.Builder(context);
         builder.setContentTitle("检测到重启");
         builder.setContentText(msg);
         builder.setSmallIcon(R.mipmap.ic_launcher);
-        Notification notification=builder.build();
-        notification.flags=Notification.FLAG_AUTO_CANCEL;
-        notificationManager.notify(NOTIFYID,notification);
+        Notification notification = builder.build();
+        notification.flags = Notification.FLAG_AUTO_CANCEL;
+        notificationManager.notify(NOTIFYID, notification);
     }
 }
