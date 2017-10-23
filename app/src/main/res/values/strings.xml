@@ -27,4 +27,6 @@
     <string name="setting">设置</string>
     <string name="warning">warning</string>
 
+    <string name="default_time">12:00</string>
+
 </resources>

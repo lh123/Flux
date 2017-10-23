@@ -11,8 +11,7 @@ import com.lh.flux.domain.utils.ThemeUtil;
 import com.lh.flux.model.api.FluxApiModule;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;
-import com.tencent.bugly.crashreport.CrashReport;
-import com.umeng.analytics.MobclickAgent;
+import com.tencent.bugly.Bugly;
 
 import java.lang.reflect.Method;
 
@@ -39,8 +38,8 @@ public class FluxApp extends Application {
         MyCrashHandler.getInstance().init(this);
         LogUtil.getInstance().init(this);
         Thread.setDefaultUncaughtExceptionHandler(MyCrashHandler.getInstance());
-        MobclickAgent.setCatchUncaughtExceptions(false);
-        CrashReport.initCrashReport(this, "900014048", false);
+//        CrashReport.initCrashReport(this, "900014048", false);
+        Bugly.init(this, "900014048", true);
         ThemeUtil.getInstance().init(this);
         initAppComponent();
     }

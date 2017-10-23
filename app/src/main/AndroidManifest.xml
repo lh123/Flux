@@ -46,19 +46,33 @@
             android:name=".domain.utils.PermissionActivity"
             android:theme="@style/PermissionActivityTheme"/>
 
-        <service android:name=".service.WelfareService"/>
+        <service
+            android:label="流量服务"
+            android:name=".service.WelfareService"/>
+
         <receiver android:name=".receiver.BootCompleteReceiver">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
 
-        <meta-data
-            android:name="UMENG_APPKEY"
-            android:value="565c8e8ae0f55a24cc0012fb"/>
-        <meta-data
-            android:name="UMENG_CHANNEL"
-            android:value="lh"/>
+        <!--bugly-->
+
+        <activity
+            android:name="com.tencent.bugly.beta.ui.BetaActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize|locale"
+            android:theme="@android:style/Theme.Translucent" />
+
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.fileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
+
     </application>
 
 </manifest>

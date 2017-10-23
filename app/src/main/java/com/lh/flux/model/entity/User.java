@@ -6,8 +6,8 @@ public class User {
     private String phone;
     private String sessionID;
     private String token;
-    private int totalFlux = -1;
-    private int availableFlux = -1;
+    private float totalFlux = -1;
+    private float availableFlux = -1;
     private String cookie;
     private String imei;
     private String imsi;
@@ -49,19 +49,19 @@ public class User {
         this.token = token;
     }
 
-    public int getTotalFlux() {
+    public float getTotalFlux() {
         return totalFlux;
     }
 
-    public void setTotalFlux(int totalFlux) {
+    public void setTotalFlux(float totalFlux) {
         this.totalFlux = totalFlux;
     }
 
-    public int getAvailableFlux() {
+    public float getAvailableFlux() {
         return availableFlux;
     }
 
-    public void setAvailableFlux(int availableFlux) {
+    public void setAvailableFlux(float availableFlux) {
         this.availableFlux = availableFlux;
     }
 

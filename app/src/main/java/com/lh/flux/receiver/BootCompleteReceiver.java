@@ -29,7 +29,7 @@ public class BootCompleteReceiver extends BroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        LogUtil.getInstance().logE("BootCompleteReceiver", "BootComplete");
+        LogUtil.getInstance().logI("BootCompleteReceiver", "BootComplete");
         if (PreferenceManager
                 .getDefaultSharedPreferences(context).getBoolean("reboot_auto_set", false)) {
             setAlarm(context);
@@ -37,6 +37,8 @@ public class BootCompleteReceiver extends BroadcastReceiver {
     }
 
     private void setAlarm(Context context) {
+        String dtime = PreferenceManager.getDefaultSharedPreferences(context).getString("default_time","12:00");
+        String times[] = dtime.split(":");
         SharedPreferences timeSp = context.getSharedPreferences("auto_grab", Context.MODE_PRIVATE);
         long advanceTime = Long.parseLong(timeSp.getString("advance_time", "3")) * 60 * 1000;
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
@@ -44,14 +46,14 @@ public class BootCompleteReceiver extends BroadcastReceiver {
         calendar.setTimeInMillis(System.currentTimeMillis());
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         if (hour < 12) {
-            calendar.set(Calendar.HOUR_OF_DAY, 12);
+            calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(times[0]));
         } else if (hour < 19) {
-            calendar.set(Calendar.HOUR_OF_DAY, 19);
+            calendar.set(Calendar.HOUR_OF_DAY, 18);
         } else {
             calendar.add(Calendar.DATE, 1);
-            calendar.set(Calendar.HOUR_OF_DAY, 12);
+            calendar.set(Calendar.HOUR_OF_DAY, Integer.parseInt(times[0]));
         }
-        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.MINUTE, Integer.parseInt(times[1]));
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         Intent i = new Intent();
@@ -70,7 +72,7 @@ public class BootCompleteReceiver extends BroadcastReceiver {
             alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() - advanceTime, pendingIntent);
         }
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        LogUtil.getInstance().logE("BootCompleteReceiver", "auto grab " + df.format(calendar.getTime()));
+        LogUtil.getInstance().logI("BootCompleteReceiver", "auto grab " + df.format(calendar.getTime()));
         String time = df.format(calendar.getTime());
         timeSp.edit().putString("time", "自动抢红包:" + time).apply();
         sendNotify(context, "自动定时:" + time);

@@ -5,8 +5,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 
-import com.umeng.analytics.MobclickAgent;
-
 public class MyCrashHandler implements Thread.UncaughtExceptionHandler {
     private static final MyCrashHandler handler = new MyCrashHandler();
 
@@ -27,7 +25,6 @@ public class MyCrashHandler implements Thread.UncaughtExceptionHandler {
     @Override
     public void uncaughtException(Thread p1, Throwable p2) {
         p2.printStackTrace();
-        MobclickAgent.reportError(mContext.getApplicationContext(), p2);
         Intent i = new Intent();
         i.setClass(mContext, CrashActivity.class);
         i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);

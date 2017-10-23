@@ -35,6 +35,11 @@ public class DatePickerFragment extends DialogFragment {
         final long advanceTime = Long.parseLong(PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).getString("advance_time", "3")) * 60 * 1000;
         final Calendar ca = Calendar.getInstance();
         ca.setTimeInMillis(System.currentTimeMillis());
+        String time[] = PreferenceManager.getDefaultSharedPreferences(getActivity()).getString("default_time", "12:00").split(":");
+        int hour = Integer.parseInt(time[0]);
+        int minute = Integer.parseInt(time[1]);
+        ca.set(Calendar.HOUR_OF_DAY, hour);
+        ca.set(Calendar.MINUTE, minute);
         int theme = ThemeUtil.getInstance().getCurrentTheme() == 0 ? R.style.DialogBlue : R.style.DialogRed;
         return new TimePickerDialog(getActivity(), theme, new TimePickerDialog.OnTimeSetListener() {
 
@@ -62,7 +67,7 @@ public class DatePickerFragment extends DialogFragment {
                 }
                 SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
                 ((FluxActivity) getActivity()).setWelfareServiceStatus("自动抢红包:" + df.format(ca.getTime()), false);
-                LogUtil.getInstance().logE("FluxPresenter", "auto grab " + df.format(ca.getTime()));
+                LogUtil.getInstance().logI("FluxPresenter", "auto grab " + df.format(ca.getTime()));
                 sp.edit().putString("time", "自动抢红包:" + df.format(ca.getTime())).apply();
             }
         }, ca.get(Calendar.HOUR_OF_DAY), ca.get(Calendar.MINUTE), true);

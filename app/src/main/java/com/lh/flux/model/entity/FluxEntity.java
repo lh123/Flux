@@ -38,17 +38,27 @@ public class FluxEntity {
 
     @SuppressWarnings("unused")
     public static class Data {
-        private Sum sum;
         private String updatedTime;
         private ArrayList<Packages> packages;
 
-        public Sum getSum() {
-            return sum;
+        public float getSumTotal() {
+            return sumTotal;
         }
 
-        public void setSum(Sum sum) {
-            this.sum = sum;
+        public void setSumTotal(float sumTotal) {
+            this.sumTotal = sumTotal;
         }
+
+        public float getSumAvailable() {
+            return sumAvailable;
+        }
+
+        public void setSumAvailable(float sumAvailable) {
+            this.sumAvailable = sumAvailable;
+        }
+
+        private float sumTotal;
+        private float sumAvailable;
 
         public String getUpdatedTime() {
             return updatedTime;
@@ -64,28 +74,6 @@ public class FluxEntity {
 
         public void setPackages(ArrayList<Packages> packages) {
             this.packages = packages;
-        }
-    }
-
-    @SuppressWarnings("unused")
-    public static class Sum {
-        private int available;
-        private int total;
-
-        public int getAvailable() {
-            return available;
-        }
-
-        public void setAvailable(int available) {
-            this.available = available;
-        }
-
-        public int getTotal() {
-            return total;
-        }
-
-        public void setTotal(int total) {
-            this.total = total;
         }
     }
 

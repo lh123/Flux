@@ -1,6 +1,5 @@
 package com.lh.flux.mvp.presenter;
 
-import android.app.ActivityManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -12,6 +11,7 @@ import android.widget.Toast;
 import com.lh.flux.domain.BusProvide;
 import com.lh.flux.domain.UpdateManager;
 import com.lh.flux.domain.event.WelfareServiceEvent;
+import com.lh.flux.domain.utils.ServiceUtil;
 import com.lh.flux.model.entity.FluxEntity;
 import com.lh.flux.model.entity.LoginEntity;
 import com.lh.flux.model.entity.UpdateEntity;
@@ -24,8 +24,6 @@ import com.lh.flux.service.WelfareService;
 import com.lh.flux.view.FluxActivity;
 import com.lh.flux.view.fragment.DatePickerFragment;
 import com.squareup.otto.Subscribe;
-
-import java.util.List;
 
 import okhttp3.ResponseBody;
 import retrofit2.Call;
@@ -91,12 +89,6 @@ public class FluxPresenter extends BasePresenter {
         service.getFluxInfo(ReferUtil.getFluxInfoRefer(userManager.getUser()), PostBodyUtil.getPhonePostBody(userManager.getUser()))
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .doOnTerminate(new Action0() {
-                    @Override
-                    public void call() {
-                        mFluxActivity.setFluxProgressStatus(false);
-                    }
-                })
                 .subscribe(new Subscriber<FluxEntity>() {
                     @Override
                     public void onCompleted() {
@@ -107,13 +99,14 @@ public class FluxPresenter extends BasePresenter {
                     public void onError(Throwable e) {
                         e.printStackTrace();
                         mFluxActivity.showToast("加载失败");
+                        mFluxActivity.setFluxProgressStatus(false);
                     }
 
                     @Override
                     public void onNext(FluxEntity fluxEntity) {
                         if (fluxEntity.isSuccess()) {
-                            int ava = fluxEntity.getData().getSum().getAvailable();
-                            int total = fluxEntity.getData().getSum().getTotal();
+                            float ava = fluxEntity.getData().getSumAvailable();
+                            float total = fluxEntity.getData().getSumTotal();
                             String msg = "流量:总共" + total + "M 可用" + ava + "M";
                             mFluxActivity.setFlux(msg, (float) (total - ava) * 100 / total);
                             userManager.getUser().setAvailableFlux(ava);
@@ -122,6 +115,7 @@ public class FluxPresenter extends BasePresenter {
                         } else {
                             mFluxActivity.showToast(fluxEntity.getMsg());
                         }
+                        mFluxActivity.setFluxProgressStatus(false);
                     }
                 });
     }
@@ -233,8 +227,8 @@ public class FluxPresenter extends BasePresenter {
                             }
                         });
                 if (userManager.getUser().getTotalFlux() != -1) {
-                    int ava = userManager.getUser().getAvailableFlux();
-                    int total = userManager.getUser().getTotalFlux();
+                    float ava = userManager.getUser().getAvailableFlux();
+                    float total = userManager.getUser().getTotalFlux();
                     String msg = "流量:总共" + total + "M 可用" + ava + "M";
                     mFluxActivity.setFlux(msg, (float) (total - ava) * 100 / total);
                 }
@@ -256,7 +250,7 @@ public class FluxPresenter extends BasePresenter {
     }
 
     public void stopWelfareService() {
-        if (isWelfareServiceRunning()) {
+        if (ServiceUtil.isWelfareServiceRunning(mFluxActivity.getContext())) {
             Intent i = new Intent();
             i.setClass(mFluxActivity.getContext().getApplicationContext(), WelfareService.class);
             i.putExtra("mode", WelfareService.STOP_SERVICE);
@@ -295,22 +289,22 @@ public class FluxPresenter extends BasePresenter {
         mFluxActivity.setWelfareServiceStatus(event.getMsg(), event.isGrabing());
     }
 
-    private boolean isWelfareServiceRunning() {
-        boolean isRunning = false;
-        ActivityManager am = (ActivityManager) mFluxActivity.getContext().getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
-        List<ActivityManager.RunningServiceInfo> list = am.getRunningServices(Integer.MAX_VALUE);
-        for (int i = 0; i < list.size(); i++) {
-            if (WelfareService.class.getName().equals(list.get(i).service.getClassName())) {
-                isRunning = true;
-                break;
-            }
-        }
-        return isRunning;
-    }
+//    private boolean isWelfareServiceRunning() {
+//        boolean isRunning = false;
+//        ActivityManager am = (ActivityManager) mFluxActivity.getContext().getApplicationContext().getSystemService(Context.ACTIVITY_SERVICE);
+//        List<ActivityManager.RunningServiceInfo> list = am.getRunningServices(Integer.MAX_VALUE);
+//        for (int i = 0; i < list.size(); i++) {
+//            if (WelfareService.class.getName().equals(list.get(i).service.getClassName())) {
+//                isRunning = true;
+//                break;
+//            }
+//        }
+//        return isRunning;
+//    }
 
     public void onDestroy() {
         mHandler.removeCallbacksAndMessages(null);
         BusProvide.getBus().unregister(this);
-        stopWelfareService();
+//        stopWelfareService();
     }
 }

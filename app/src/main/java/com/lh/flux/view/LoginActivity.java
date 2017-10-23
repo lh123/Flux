@@ -15,7 +15,6 @@ import com.lh.flux.mvp.presenter.LoginPresenter;
 import com.lh.flux.mvp.view.ILoginActivity;
 import com.lh.flux.view.component.DaggerLoginActivityComponent;
 import com.lh.flux.view.module.LoginActivityModule;
-import com.umeng.analytics.MobclickAgent;
 
 import javax.inject.Inject;
 
@@ -75,13 +74,11 @@ public class LoginActivity extends BaseActivity implements ILoginActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        MobclickAgent.onResume(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        MobclickAgent.onPause(this);
     }
 
     @Override

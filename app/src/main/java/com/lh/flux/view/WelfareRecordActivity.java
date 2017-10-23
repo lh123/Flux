@@ -16,7 +16,6 @@ import com.lh.flux.mvp.view.IWelfareRecordActivity;
 import com.lh.flux.view.adapter.WelfareRecyclerAdapter;
 import com.lh.flux.view.component.DaggerWelfareRecordActivityComponent;
 import com.lh.flux.view.module.WelfareRecordActivityModule;
-import com.umeng.analytics.MobclickAgent;
 
 import java.util.ArrayList;
 
@@ -96,13 +95,11 @@ public class WelfareRecordActivity extends BaseActivity implements IWelfareRecor
     @Override
     protected void onResume() {
         super.onResume();
-        MobclickAgent.onResume(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        MobclickAgent.onPause(this);
     }
 
     @Override

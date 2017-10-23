@@ -9,6 +9,11 @@
             android:title="主题"/>
     </PreferenceCategory>
     <PreferenceCategory android:title="通用设置">
+        <Preference
+            android:key="default_time"
+            android:title="默认时间"
+            android:defaultValue="@string/default_time"
+            android:summary="设置默认时间"/>
         <EditTextPreference
             android:defaultValue="5"
             android:dialogTitle="输入设置"

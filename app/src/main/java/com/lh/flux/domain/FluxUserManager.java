@@ -42,8 +42,8 @@ public class FluxUserManager {
         user.setPhone(mPreference.getString("phone", null));
         user.setToken(mPreference.getString("token", null));
         user.setSessionID(mPreference.getString("sessionID", null));
-        user.setAvailableFlux(mPreference.getInt("availableFlux", 0));
-        user.setTotalFlux(mPreference.getInt("totalFlux", 0));
+        user.setAvailableFlux(mPreference.getFloat("availableFlux", 0));
+        user.setTotalFlux(mPreference.getFloat("totalFlux", 0));
     }
 
     public void saveUser() {
@@ -53,8 +53,8 @@ public class FluxUserManager {
         edit.putString("phone", user.getPhone());
         edit.putString("token", user.getToken());
         edit.putString("sessionID", user.getSessionID());
-        edit.putInt("availableFlux", user.getAvailableFlux());
-        edit.putInt("totalFlux", user.getTotalFlux());
+        edit.putFloat("availableFlux", user.getAvailableFlux());
+        edit.putFloat("totalFlux", user.getTotalFlux());
         edit.apply();
     }
 

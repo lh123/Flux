@@ -46,7 +46,6 @@ public class LogUtil {
             File file = new File(dir, "log.txt");
             boolean isAppend = true;
             if (file.length() > 50 * 1024) {
-                //System.out.println("clear");
                 isAppend = false;
             }
             try {
@@ -59,7 +58,7 @@ public class LogUtil {
         }
     }
 
-    public void logE(String tag, String msg) {
+    public void logI(String tag, String msg) {
         Log.i(tag, msg == null ? "null" : msg);
         if (isInit) {
             Date date = new Date(System.currentTimeMillis());

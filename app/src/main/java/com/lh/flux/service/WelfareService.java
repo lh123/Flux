@@ -46,11 +46,12 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class WelfareService extends Service {
+
     public static final int START_GRAB = 0;
     public static final int START_GRAB_DELY = 1;
     public static final int STOP_SERVICE = 2;
-    public static final int FLAG_SERVICE_RUNNING = 0;
-    public static final int FLAG_WELFARE_RESULT = 1;
+    public static final int FLAG_SERVICE_RUNNING = 1;
+    public static final int FLAG_SERVICE_RESULT = 2;
     public static final String LOCK_TAG = "auto_grab_welfare";
     @Inject
     FluxApiService service;
@@ -63,6 +64,9 @@ public class WelfareService extends Service {
     private boolean isAlive = false;
     private boolean isGrabWelfare = false;
     private boolean isFullAuto = false;
+    private int mHour = 12;
+    private int mMinute = 0;
+
     private PowerManager.WakeLock lock;
     private WifiManager.WifiLock wlock;
     private NotificationManager nm;
@@ -72,9 +76,13 @@ public class WelfareService extends Service {
         super.onCreate();
         setUpComponent();
         Log("service creat");
+        init();
+    }
+
+    private void init() {
         mHandler = new Handler();
         PowerManager pw = (PowerManager) getSystemService(POWER_SERVICE);
-        WifiManager wm = (WifiManager) getSystemService(WIFI_SERVICE);
+        WifiManager wm = (WifiManager)getApplicationContext().getSystemService(WIFI_SERVICE);
         nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
         lock = pw.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, LOCK_TAG);
@@ -87,6 +95,9 @@ public class WelfareService extends Service {
         loginTimes = Integer.parseInt(sp.getString("retry_times", "3"));
         durTime = Long.parseLong(sp.getString("time_out", "3")) * 60 * 1000L;
         isFullAuto = sp.getBoolean("full_auto", false);
+        String time[] = sp.getString("default_time","12:00").split(":");
+        mHour = Integer.parseInt(time[0]);
+        mMinute = Integer.parseInt(time[1]);
         Log("lock cpu wifi");
         isAlive = true;
     }
@@ -100,6 +111,7 @@ public class WelfareService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        initForeground();
         int mode = intent.getIntExtra("mode", -1);
         if (mode == STOP_SERVICE) {
             releaseLockAndStop();
@@ -123,12 +135,26 @@ public class WelfareService extends Service {
                 Toast.makeText(getApplicationContext(), "服务已在运行", Toast.LENGTH_SHORT).show();
             }
         }
-        return START_NOT_STICKY;
+        return START_REDELIVER_INTENT;
+    }
+
+    private void initForeground() {
+        Log("initForeground");
+        Notification.Builder builder=new Notification.Builder(this);
+//        builder.setOngoing(true);
+//        builder.setAutoCancel(false);
+        builder.setSmallIcon(R.mipmap.ic_launcher);
+        builder.setContentTitle("服务运行中");
+        builder.setContentText("等待中····");
+        Intent pI=new Intent(this,FluxActivity.class);
+        PendingIntent pendingIntent=PendingIntent.getActivity(this,0,pI,PendingIntent.FLAG_UPDATE_CURRENT);
+        builder.setContentIntent(pendingIntent);
+        startForeground(FLAG_SERVICE_RUNNING,builder.build());
     }
 
     private void startAutoGrabWithDely() {
         isGrabWelfare = true;
-        showNotification("正在等待", FLAG_SERVICE_RUNNING);
+//        showNotification("正在等待", FLAG_SERVICE_RUNNING);
         SharedPreferences sp = getSharedPreferences("auto_grab", Context.MODE_PRIVATE);
         sp.edit().putString("time", null).apply();
         long delyTime = actTime - startTime;
@@ -169,7 +195,7 @@ public class WelfareService extends Service {
                                 if (loginTimes > 0) {
                                     startAutoGrab();
                                 } else {
-                                    showNotification("登陆失败", FLAG_SERVICE_RUNNING);
+                                    showNotification("登陆失败", FLAG_SERVICE_RESULT);
                                     releaseLockAndStop();
                                 }
                             }
@@ -182,6 +208,14 @@ public class WelfareService extends Service {
                                     userManager.getUser().setSessionID(loginEntity.getSessionID());
                                     userManager.saveUser();
                                     startAutoGrab();
+                                }else {
+                                    loginTimes--;
+                                    if (loginTimes > 0) {
+                                        startAutoGrab();
+                                    } else {
+                                        showNotification("登陆失败", FLAG_SERVICE_RESULT);
+                                        releaseLockAndStop();
+                                    }
                                 }
                             }
                         });
@@ -196,7 +230,7 @@ public class WelfareService extends Service {
 
                             @Override
                             public void onFailure(Call<ResponseBody> call, Throwable t) {
-                                showNotification("获取Cookie失败", FLAG_WELFARE_RESULT);
+                                showNotification("获取Cookie失败", FLAG_SERVICE_RESULT);
                                 releaseLockAndStop();
                             }
                         });
@@ -223,7 +257,7 @@ public class WelfareService extends Service {
                         });
             }
         } else {
-            showNotification("权限被禁止，无法登陆", FLAG_WELFARE_RESULT);
+            showNotification("权限被禁止，无法登陆", FLAG_SERVICE_RESULT);
             releaseLockAndStop();
         }
     }
@@ -254,14 +288,14 @@ public class WelfareService extends Service {
             builder.setAutoCancel(true);
             builder.setOngoing(false);
             Notification no = builder.build();
-            nm.notify(FLAG_WELFARE_RESULT, no);
+            nm.notify(FLAG_SERVICE_RESULT, no);
         }
     }
 
     public void onGrabEventReceive(GrabInfoEntity entity) {
         if ("000".equals(entity.getReturnCode())) {
             isGrabWelfare = false;
-            showNotification("抢到红包", FLAG_WELFARE_RESULT);
+            showNotification("抢到红包", FLAG_SERVICE_RESULT);
             releaseLockAndStop();
         } else if ("001".equals(entity.getReturnCode())) {
             showNotification("正在重新获取Cookie", FLAG_SERVICE_RUNNING);
@@ -272,11 +306,11 @@ public class WelfareService extends Service {
             grabWelfareDelay();
         } else if ("003".equals(entity.getReturnCode())) {
             isGrabWelfare = false;
-            showNotification("每天只能抢一次红包", FLAG_WELFARE_RESULT);
+            showNotification("每天只能抢一次红包", FLAG_SERVICE_RESULT);
             releaseLockAndStop();
         } else if ("004".equals(entity.getReturnCode())) {
             isGrabWelfare = false;
-            showNotification("没抢到红包", FLAG_WELFARE_RESULT);
+            showNotification("没抢到红包", FLAG_SERVICE_RESULT);
             releaseLockAndStop();
         }
     }
@@ -300,7 +334,7 @@ public class WelfareService extends Service {
         if (System.currentTimeMillis() - actTime > durTime) {
             isGrabWelfare = false;
             Log("超时");
-            showNotification("超时", FLAG_WELFARE_RESULT);
+            showNotification("超时", FLAG_SERVICE_RESULT);
             releaseLockAndStop();
         } else {
             mHandler.postDelayed(new Runnable() {
@@ -316,7 +350,7 @@ public class WelfareService extends Service {
     }
 
     private void Log(String msg) {
-        LogUtil.getInstance().logE("WelfareService", msg);
+        LogUtil.getInstance().logI("WelfareService", msg);
 
     }
 
@@ -349,14 +383,15 @@ public class WelfareService extends Service {
     }
 
     private void setAlarm() {
-        SharedPreferences timeSp = getSharedPreferences("auto_grab", Context.MODE_PRIVATE);
+        SharedPreferences timeSp = getSharedPreferences("auto_grab",MODE_PRIVATE);
+        //getSharedPreferences("auto_grab", Context.MODE_PRIVATE);
         long advanceTime = Long.parseLong(timeSp.getString("advance_time", "3")) * 60 * 1000;
         AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(System.currentTimeMillis());
         calendar.add(Calendar.DATE, 1);
-        calendar.set(Calendar.HOUR_OF_DAY, 12);
-        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.HOUR_OF_DAY, mHour);
+        calendar.set(Calendar.MINUTE, mMinute);
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
         Intent i = new Intent();
@@ -371,13 +406,14 @@ public class WelfareService extends Service {
             alarmManager.set(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() - advanceTime, pendingIntent);
         }
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
-        LogUtil.getInstance().logE("WelfareService", "auto grab " + df.format(calendar.getTime()));
+        LogUtil.getInstance().logI("WelfareService", "auto grab " + df.format(calendar.getTime()));
         timeSp.edit().putString("time", "自动抢红包:" + df.format(calendar.getTime())).apply();
     }
 
     @Override
     public void onDestroy() {
         isAlive = false;
+        stopForeground(true);
         nm.cancel(FLAG_SERVICE_RUNNING);
         BusProvide.getBus().unregister(this);
         mHandler.removeCallbacksAndMessages(null);

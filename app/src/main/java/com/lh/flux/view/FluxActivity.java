@@ -2,8 +2,10 @@ package com.lh.flux.view;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,12 +19,12 @@ import com.lh.flux.R;
 import com.lh.flux.domain.UpdateManager;
 import com.lh.flux.domain.utils.PermissionActivity;
 import com.lh.flux.domain.utils.PermissionChecker;
+import com.lh.flux.domain.utils.ServiceUtil;
 import com.lh.flux.domain.utils.ThemeUtil;
 import com.lh.flux.mvp.presenter.FluxPresenter;
 import com.lh.flux.mvp.view.IFluxActivity;
 import com.lh.flux.view.component.DaggerFluxActivityComponent;
 import com.lh.flux.view.module.FluxActivityModule;
-import com.umeng.analytics.MobclickAgent;
 
 import java.util.Locale;
 
@@ -253,13 +255,11 @@ public class FluxActivity extends BaseActivity implements View.OnClickListener, 
     @Override
     protected void onResume() {
         super.onResume();
-        MobclickAgent.onResume(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        MobclickAgent.onPause(this);
     }
 
     @Override
@@ -303,15 +303,39 @@ public class FluxActivity extends BaseActivity implements View.OnClickListener, 
         long backSec;
         if (backFirst < 0) {
             backFirst = System.currentTimeMillis();
-            showToast("退出将会终止抢红包,再按一次退出");
+            showToast("再按一次退出");
         } else {
             backSec = System.currentTimeMillis();
             if (backSec - backFirst < 1000) {
-                finish();
+                if(ServiceUtil.isWelfareServiceRunning(getApplicationContext())){
+                    showServiceRunningDialoag();
+                }else {
+                    finish();
+                }
             } else {
                 backFirst = System.currentTimeMillis();
-                showToast("退出将会终止抢红包,再按一次退出");
+                showToast("再按一次退出");
             }
         }
+    }
+
+    private void showServiceRunningDialoag() {
+        AlertDialog.Builder builder=new AlertDialog.Builder(this);
+        builder.setTitle("是否结束红包服务");
+        builder.setMessage("当前服务正在运行，是否关闭服务?");
+        builder.setPositiveButton("关闭服务", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mPresenter.stopWelfareService();
+                finish();
+            }
+        });
+        builder.setNegativeButton("继续后台运行", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                finish();
+            }
+        });
+        builder.show();
     }
 }

@@ -7,7 +7,6 @@ import android.support.v7.widget.Toolbar;
 import com.lh.flux.R;
 import com.lh.flux.domain.utils.ThemeUtil;
 import com.lh.flux.view.fragment.SettingFragment;
-import com.umeng.analytics.MobclickAgent;
 
 public class SettingActivity extends AppCompatActivity {
 
@@ -25,13 +24,11 @@ public class SettingActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        MobclickAgent.onResume(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        MobclickAgent.onPause(this);
     }
 
 }
